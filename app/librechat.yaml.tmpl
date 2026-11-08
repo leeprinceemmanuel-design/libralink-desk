@@ -1,0 +1,55 @@
+# LibraLink Desk - LibreChat configuration TEMPLATE.
+# Do not edit librechat.yaml directly: ops/render_config.py builds it from this file,
+# the system prompt (app/system-prompt.txt) and the handbook in content/ (synced from S3).
+# The three placeholders below (model name, site URL, prompt) are filled in by that script.
+version: 1.2.8
+cache: true
+
+interface:
+  customWelcome: "Hi {{user.name}}! Ask me about library hours, borrowing, fines, rooms or e-resources."
+  privacyPolicy:
+    externalUrl: "__SITE_URL__/system.html#privacy"
+    openNewTab: true
+  termsOfService:
+    externalUrl: "__SITE_URL__/system.html#terms"
+    openNewTab: true
+    modalAcceptance: true
+    modalTitle: "Before you use LibraLink Desk"
+    modalContent: |
+      LibraLink Desk is a school project (SAM10). The library, university and every
+      rule it knows are invented.
+
+      - It gives general library information only. It cannot see your account,
+        loans or fines, and it cannot approve or waive anything.
+      - Do not type personal information (names, ID numbers, phone numbers,
+        emails or addresses). Questions are sent to an external AI model
+        (Google Gemini) and are logged for 14 days for monitoring.
+      - Answers can be wrong. Always confirm important details with library staff.
+  modelSelect: false
+  parameters: false
+  presets: false
+  prompts: false
+  bookmarks: false
+  multiConvo: false
+  agents: false
+  runCode: false
+  webSearch: false
+  fileSearch: false
+
+modelSpecs:
+  enforce: true
+  prioritize: true
+  list:
+    - name: "libralink-desk"
+      label: "LibraLink Desk"
+      default: true
+      description: "Library help desk for the (fictional) Luntian Ridge University Library."
+      iconURL: "/assets/logo.svg"
+      preset:
+        endpoint: "google"
+        model: "__GOOGLE_MODEL__"
+        modelLabel: "LibraLink Desk"
+        greeting: "Ask me about library hours, borrowing limits, fines, discussion rooms, laptops, printing or e-journals."
+        temperature: 0.2
+        promptPrefix: |
+__PROMPT__

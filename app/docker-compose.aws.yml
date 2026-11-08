@@ -1,0 +1,34 @@
+# Extra settings used only on the AWS server (added by ops/start.sh with -f).
+# Sends container output straight to CloudWatch Logs:
+#   /libralink/app      <- LibreChat application log
+#   /libralink/mongodb  <- database log
+# ("docker logs" still works thanks to Docker's local log cache.)
+services:
+  api:
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: ${AWS_REGION}
+        awslogs-group: /libralink/app
+        awslogs-create-group: "true"
+        tag: "librechat-{{.ID}}"
+    labels:
+      Project: SAM10
+      Team: libralink
+
+  mongodb:
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: ${AWS_REGION}
+        awslogs-group: /libralink/mongodb
+        awslogs-create-group: "true"
+        tag: "mongodb-{{.ID}}"
+    labels:
+      Project: SAM10
+      Team: libralink
+
+  nginx:
+    labels:
+      Project: SAM10
+      Team: libralink

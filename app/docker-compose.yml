@@ -1,0 +1,57 @@
+# LibraLink Desk - the whole app stack.
+#   nginx   -> public entry point on port 80 (CloudFront sits in front of it in AWS)
+#   api     -> LibreChat (the base system we reskinned)
+#   mongodb -> LibreChat's database (users, conversations, messages)
+# Secrets come from environment variables set by ops/start.sh (from Parameter Store),
+# never from a file in this repository.
+name: libralink
+
+services:
+  api:
+    image: ${LIBRECHAT_IMAGE:-ghcr.io/danny-avila/librechat:latest}
+    container_name: LibreChat
+    restart: always
+    # Same as LibreChat's own compose file: run as a normal user so the data folders stay writable.
+    user: "${UID:-1000}:${GID:-1000}"
+    depends_on: [mongodb]
+    env_file: [librechat.env]
+    environment:
+      MONGO_URI: mongodb://mongodb:27017/LibreChat
+      DOMAIN_CLIENT: ${PUBLIC_URL:-http://localhost:8080}
+      DOMAIN_SERVER: ${PUBLIC_URL:-http://localhost:8080}
+      HELP_AND_FAQ_URL: ${SITE_URL:-http://localhost:8080}
+      GOOGLE_MODELS: ${GOOGLE_MODEL:?GOOGLE_MODEL not set}
+      GOOGLE_TITLE_MODEL: ${GOOGLE_MODEL}
+      GOOGLE_KEY: ${GOOGLE_KEY:?GOOGLE_KEY not set - run ops/start.sh}
+      CREDS_KEY: ${CREDS_KEY:?CREDS_KEY not set}
+      CREDS_IV: ${CREDS_IV:?CREDS_IV not set}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET not set}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?JWT_REFRESH_SECRET not set}
+    volumes:
+      - ./librechat.yaml:/app/librechat.yaml:ro
+      - ./data/uploads:/app/uploads
+      - ./data/images:/app/client/public/images
+      - ./data/logs:/app/logs
+    expose: ["3080"]
+
+  mongodb:
+    image: mongo:8.0
+    container_name: chat-mongodb
+    restart: always
+    # Same as LibreChat's own compose file: no auth inside the private Docker network.
+    # The database port is NOT published to the host or the internet.
+    command: mongod --noauth
+    volumes:
+      - ./data/mongo:/data/db
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: libralink-nginx
+    restart: always
+    depends_on: [api]
+    ports:
+      - "${HTTP_PORT:-80}:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./branding:/branding:ro
+      - ${NGINX_LOG_DIR:-./data/nginx-logs}:/var/log/nginx

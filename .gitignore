@@ -1,0 +1,15 @@
+# runtime data and generated files - never commit
+app/data/
+app/librechat.yaml
+run/
+ops/aws/.state
+ops/aws/.state.tmp
+eval/results/*.csv
+!eval/results/.keep
+
+# anything that might hold a secret
+.env
+*.env.local
+*.pem
+*.key
+evidence-*.txt

@@ -1,0 +1,117 @@
+/* LibraLink Desk theme.
+   nginx injects this file into every LibreChat page (see app/nginx/nginx.conf).
+   It overrides LibreChat's color variables, so the stock image does not need rebuilding.
+   Both naming styles are set: the plain variables (--surface-primary) used by tagged
+   releases, and the rgb-* triplets used by the newer theme engine. Unknown names are harmless. */
+
+@import url("https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&display=swap");
+
+html:root {
+  /* palette */
+  --ll-teal-900: #0B3B3E;
+  --ll-teal-700: #0F5257;
+  --ll-teal-500: #2A7C80;
+  --ll-teal-100: #DCEFEE;
+  --ll-amber-500: #E8A33D;
+  --ll-amber-700: #B97A22;
+  --ll-cream: #FBF7EF;
+  --ll-paper: #F3EDE1;
+  --ll-sand: #E3D9C6;
+  --ll-ink: #1F2A2C;
+  --ll-ink-soft: #4F5D5F;
+
+  --presentation: var(--ll-cream) !important;
+  --text-primary: var(--ll-ink) !important;
+  --text-secondary: var(--ll-ink-soft) !important;
+  --text-tertiary: #6E7B7C !important;
+  --header-primary: var(--ll-cream) !important;
+  --header-hover: var(--ll-paper) !important;
+  --surface-primary: var(--ll-cream) !important;
+  --surface-primary-alt: var(--ll-paper) !important;
+  --surface-secondary: var(--ll-paper) !important;
+  --surface-secondary-alt: var(--ll-sand) !important;
+  --surface-tertiary: var(--ll-sand) !important;
+  --surface-chat: var(--ll-cream) !important;
+  --surface-dialog: var(--ll-cream) !important;
+  --surface-hover: var(--ll-teal-100) !important;
+  --surface-active: var(--ll-teal-100) !important;
+  --surface-submit: var(--ll-teal-700) !important;
+  --surface-submit-hover: var(--ll-teal-900) !important;
+  --border-light: var(--ll-sand) !important;
+  --border-medium: #D3C6AE !important;
+  --border-heavy: #BFAE90 !important;
+  --ring-primary: var(--ll-teal-500) !important;
+  --brand-purple: var(--ll-teal-700) !important;
+
+  /* newer theme engine tokens (R G B triplets) */
+  --rgb-surface-primary: 251 247 239 !important;
+  --rgb-surface-secondary: 243 237 225 !important;
+  --rgb-surface-tertiary: 227 217 198 !important;
+  --rgb-surface-submit: 15 82 87 !important;
+  --rgb-surface-submit-hover: 11 59 62 !important;
+  --rgb-text-primary: 31 42 44 !important;
+  --rgb-text-secondary: 79 93 95 !important;
+  --rgb-border-light: 227 217 198 !important;
+  --rgb-ring-primary: 42 124 128 !important;
+}
+
+html.dark {
+  --presentation: #0E1C1E !important;
+  --text-primary: #EDE6D8 !important;
+  --text-secondary: #B9C4C2 !important;
+  --header-primary: #0E1C1E !important;
+  --header-hover: #17302F !important;
+  --surface-primary: #0E1C1E !important;
+  --surface-primary-alt: #132628 !important;
+  --surface-secondary: #132628 !important;
+  --surface-secondary-alt: #1B3436 !important;
+  --surface-tertiary: #1B3436 !important;
+  --surface-chat: #0E1C1E !important;
+  --surface-dialog: #132628 !important;
+  --surface-hover: #1E3B3D !important;
+  --surface-active: #1E3B3D !important;
+  --surface-submit: #E8A33D !important;
+  --surface-submit-hover: #B97A22 !important;
+  --border-light: #24413F !important;
+  --border-medium: #2F504E !important;
+  --brand-purple: #E8A33D !important;
+
+  --rgb-surface-primary: 14 28 30 !important;
+  --rgb-surface-secondary: 19 38 40 !important;
+  --rgb-surface-tertiary: 27 52 54 !important;
+  --rgb-surface-submit: 232 163 61 !important;
+  --rgb-text-primary: 237 230 216 !important;
+  --rgb-border-light: 36 65 63 !important;
+}
+
+html body, html button, html input, html textarea {
+  font-family: "Nunito Sans", "Segoe UI", system-ui, -apple-system, sans-serif !important;
+}
+
+/* send button and primary buttons */
+html button[data-testid="send-button"],
+html button[type="submit"].btn-primary,
+html .btn-primary {
+  background-color: var(--ll-teal-700) !important;
+  color: #fff !important;
+}
+html.dark button[data-testid="send-button"],
+html.dark .btn-primary {
+  background-color: var(--ll-amber-500) !important;
+  color: #1F2A2C !important;
+}
+
+/* links */
+html a:not([class*="btn"]) { color: var(--ll-teal-700); }
+html.dark a:not([class*="btn"]) { color: var(--ll-amber-500); }
+
+/* thin brand stripe across the top of every page */
+html body::before {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: 4px;
+  background: linear-gradient(90deg, #0F5257 0 70%, #E8A33D 70% 100%);
+  z-index: 9999;
+  pointer-events: none;
+}
