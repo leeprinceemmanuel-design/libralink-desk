@@ -1,0 +1,16 @@
+[Unit]
+Description=LibraLink Desk (LibreChat + MongoDB + nginx)
+After=docker.service network-online.target
+Requires=docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/opt/libralink
+ExecStart=/opt/libralink/ops/start.sh
+ExecStop=/opt/libralink/ops/stop.sh
+TimeoutStartSec=900
+
+[Install]
+WantedBy=multi-user.target

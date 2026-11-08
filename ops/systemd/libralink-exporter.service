@@ -1,0 +1,8 @@
+[Unit]
+Description=LibraLink request logger (writes one JSON line per answered question)
+After=libralink.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /opt/libralink/ops/exporter.py
+TimeoutStartSec=60

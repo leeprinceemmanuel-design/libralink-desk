@@ -1,0 +1,12 @@
+# /etc/logrotate.d/libralink  - added as the PREVENTION step after the disk-full incident.
+# Every log under /var/log/libralink is capped: rotated when it passes 50 MB,
+# compressed, and only 5 old copies kept. Checked every 15 minutes by logrotate-libralink.timer.
+/var/log/libralink/*.log /var/log/libralink/nginx/*.log {
+    size 50M
+    rotate 5
+    compress
+    missingok
+    notifempty
+    copytruncate
+    su root root
+}

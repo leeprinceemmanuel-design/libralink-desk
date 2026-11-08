@@ -1,0 +1,60 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ReadOwnParameters",
+      "Effect": "Allow",
+      "Action": ["ssm:GetParametersByPath", "ssm:GetParameter", "ssm:GetParameters"],
+      "Resource": "arn:aws:ssm:__REGION__:__ACCOUNT_ID__:parameter/libralink/*"
+    },
+    {
+      "Sid": "ListParameterNamesForBackupInventory",
+      "Effect": "Allow",
+      "Action": "ssm:DescribeParameters",
+      "Resource": "*"
+    },
+    {
+      "Sid": "DecryptSecureStringsViaSsmOnly",
+      "Effect": "Allow",
+      "Action": "kms:Decrypt",
+      "Resource": "*",
+      "Condition": { "StringEquals": { "kms:ViaService": "ssm.__REGION__.amazonaws.com" } }
+    },
+    {
+      "Sid": "ListBucket",
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": "arn:aws:s3:::__BUCKET__"
+    },
+    {
+      "Sid": "ReadHandbookAndBackups",
+      "Effect": "Allow",
+      "Action": "s3:GetObject",
+      "Resource": ["arn:aws:s3:::__BUCKET__/content/*", "arn:aws:s3:::__BUCKET__/backups/*"]
+    },
+    {
+      "Sid": "WriteBackupsOnly",
+      "Effect": "Allow",
+      "Action": "s3:PutObject",
+      "Resource": "arn:aws:s3:::__BUCKET__/backups/*"
+    },
+    {
+      "Sid": "ShipLogsToOwnLogGroups",
+      "Effect": "Allow",
+      "Action": ["logs:CreateLogStream", "logs:PutLogEvents", "logs:DescribeLogStreams", "logs:CreateLogGroup", "logs:PutRetentionPolicy"],
+      "Resource": "arn:aws:logs:__REGION__:__ACCOUNT_ID__:log-group:/libralink/*"
+    },
+    {
+      "Sid": "PublishAgentMetrics",
+      "Effect": "Allow",
+      "Action": ["cloudwatch:PutMetricData", "ec2:DescribeTags", "ec2:DescribeVolumes"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "BackupFailureEmail",
+      "Effect": "Allow",
+      "Action": "sns:Publish",
+      "Resource": "__TOPIC_ARN__"
+    }
+  ]
+}

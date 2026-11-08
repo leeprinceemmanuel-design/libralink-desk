@@ -1,0 +1,46 @@
+{
+  "agent": {
+    "metrics_collection_interval": 60,
+    "run_as_user": "root"
+  },
+  "metrics": {
+    "namespace": "CWAgent",
+    "append_dimensions": { "InstanceId": "${aws:InstanceId}" },
+    "aggregation_dimensions": [["InstanceId"]],
+    "metrics_collected": {
+      "mem":  { "measurement": ["mem_used_percent"] },
+      "swap": { "measurement": ["swap_used_percent"] },
+      "disk": {
+        "measurement": ["used_percent"],
+        "resources": ["/"],
+        "drop_device": true
+      }
+    }
+  },
+  "logs": {
+    "logs_collected": {
+      "files": {
+        "collect_list": [
+          {
+            "file_path": "/var/log/libralink/requests.log",
+            "log_group_name": "/libralink/requests",
+            "log_stream_name": "{instance_id}",
+            "retention_in_days": 14
+          },
+          {
+            "file_path": "/var/log/libralink/nginx/access.log",
+            "log_group_name": "/libralink/nginx",
+            "log_stream_name": "{instance_id}",
+            "retention_in_days": 14
+          },
+          {
+            "file_path": "/var/log/libralink/automation.log",
+            "log_group_name": "/libralink/automation",
+            "log_stream_name": "{instance_id}",
+            "retention_in_days": 30
+          }
+        ]
+      }
+    }
+  }
+}

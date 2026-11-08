@@ -1,0 +1,10 @@
+[Unit]
+Description=Run the LibraLink request logger every minute
+
+[Timer]
+OnBootSec=2min
+OnCalendar=minutely
+AccuracySec=5s
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,28 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ManageOwnPasswordAndMfa",
+      "Effect": "Allow",
+      "Action": [
+        "iam:ChangePassword",
+        "iam:GetUser",
+        "iam:GetLoginProfile",
+        "iam:CreateVirtualMFADevice",
+        "iam:EnableMFADevice",
+        "iam:ResyncMFADevice",
+        "iam:ListMFADevices"
+      ],
+      "Resource": [
+        "arn:aws:iam::*:user/${aws:username}",
+        "arn:aws:iam::*:mfa/*"
+      ]
+    },
+    {
+      "Sid": "ListMfaDevicesForTheConsolePage",
+      "Effect": "Allow",
+      "Action": ["iam:ListVirtualMFADevices", "iam:GetAccountPasswordPolicy"],
+      "Resource": "*"
+    }
+  ]
+}
