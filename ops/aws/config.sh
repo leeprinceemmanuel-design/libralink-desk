@@ -4,7 +4,7 @@
 # Every script does:  source "$(dirname "$0")/config.sh"
 set -euo pipefail
 
-export AWS_REGION="${AWS_REGION:-ap-southeast-1}"     # Singapore, closest to the Philippines
+export AWS_REGION="${LL_REGION:-ap-southeast-1}"   # always Singapore (CloudShell sets AWS_REGION to the console region)
 export AWS_DEFAULT_REGION="$AWS_REGION"
 export AWS_PAGER=""
 
