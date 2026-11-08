@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LibraLink Desk · SAM10 final project</title>
+<meta name="description" content="LibraLink Desk: a library help-desk AI assistant, reskinned from LibreChat, deployed and operated on AWS.">
+<link rel="icon" href="assets/favicon.png"><link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<main>
+  <div class="page-head">
+    <div class="kicker">SAM10 Systems Administration and Maintenance · Final project</div>
+    <h1>LibraLink Desk: a library help desk that answers any time — and is run properly</h1>
+    <p class="lead">An AI assistant for the (invented) Luntian Ridge University Library. It answers questions about opening hours, borrowing, fines, rooms and e-resources from the library's own handbook, and sends people to the right desk for everything else.</p>
+  </div>
+
+  <div class="grid">
+    <div class="card"><div class="stat">Live</div><div class="stat-label">at <a href="FILL-CLOUDFRONT-URL"><span class="fill">FILL: https://xxxx.cloudfront.net</span></a> (HTTPS)</div></div>
+    <div class="card"><div class="stat"><span class="fill">FILL: 27/30</span></div><div class="stat-label">test questions answered correctly (<a href="results.html#quality">how we measured</a>)</div></div>
+    <div class="card"><div class="stat">12</div><div class="stat-label">alarms that e-mail both of us (<a href="operations.html#monitoring">monitoring</a>)</div></div>
+    <div class="card"><div class="stat">Hourly</div><div class="stat-label">backups, restore tested in <span class="fill">FILL: N</span> minutes (<a href="operations.html#backup">backup</a>)</div></div>
+  </div>
+
+  <h2>Presentation video</h2>
+  <div class="video">
+    <!-- Replace VIDEO_ID with your YouTube video id (the part after watch?v=). Set the video to Unlisted. -->
+    <iframe src="https://www.youtube-nocookie.com/embed/VIDEO_ID" title="LibraLink Desk presentation" allow="accelerometer; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+  </div>
+  <p class="stat-label"><span class="fill">FILL: replace VIDEO_ID above</span> · 5–8 minutes · presented by Prince Emmanuel C. Lee and <span class="fill">FILL: partner's name</span>.</p>
+
+  <h2>Executive summary (plain English)</h2>
+  <h3>What the system does</h3>
+  <p>Students and staff open a web page, sign in, and type a question such as "How many books can I borrow?" or "Where do I pay a fine?". The assistant answers in a few sentences, using only the library handbook we wrote, and says which section the answer came from. If the handbook does not cover the question, it says so and names the desk to ask. It never looks up anyone's account and never decides anything about a person — for example, it cannot waive a fine.</p>
+  <p>We did not build the chat program from scratch. We took <a href="https://github.com/danny-avila/LibreChat">LibreChat</a>, a popular open-source chat application (MIT licence), and reskinned it: new name, logo, colours, wording, our own handbook, and our own rules. The "brain" is Google's Gemini model, reached over the internet; we do not run the model ourselves. Everything else — the server, storage, security, monitoring, backups — runs in our AWS account in Singapore.</p>
+
+  <h3>What was wrong with how it was run at first</h3>
+  <p>The first version worked, but nobody would want to rely on it. It ran on plain HTTP with the server open to the whole internet, nobody would have known if it crashed or filled its disk, there were no backups, and logs could grow until they filled the disk. Details are on the <a href="baseline.html">Baseline</a> page.</p>
+
+  <h3>What we changed</h3>
+  <ul>
+    <li><b>Safer access:</b> HTTPS through CloudFront; the server only accepts traffic from CloudFront; no SSH port at all; each of us has our own login with MFA, and admin rights only through a short-lived role.</li>
+    <li><b>No secrets in code:</b> the AI key and encryption keys live in AWS Parameter Store and are read when the app starts.</li>
+    <li><b>We can see it working:</b> a dashboard and 12 alarms, including ones that notice when the system is "up but useless" (failed, empty or "not found" answers).</li>
+    <li><b>We can get it back:</b> the database is backed up to S3 every hour and we actually restored it and logged back in.</li>
+    <li><b>Less manual work:</b> backups and an outside health check run on their own.</li>
+    <li><b>We broke it on purpose and fixed it for good:</b> we filled the disk, watched the alarm fire, found the cause (a log file with no size limit) and added log rotation so it cannot happen the same way again.</li>
+  </ul>
+
+  <h3>What improved</h3>
+  <p><span class="fill">FILL after measuring (see Results): e.g. "Time to detect a full disk went from 'never' to 4 minutes; 100% of hourly backups succeeded over 2 days; average answer time 3.1 s; cost per day went from $X to $Y after right-sizing."</span></p>
+
+  <div class="note"><b>Trade-off we chose:</b> we optimised for <b>Security</b> and <b>Operational Excellence</b> and deliberately accepted a weaker <b>Reliability</b> design — one server in one Availability Zone, so if that zone fails the service is down until we rebuild it from backups. For a class-sized library assistant, that is cheaper and simpler, and our tested restore keeps the damage small. See the <a href="well-architected.html">Well-Architected review</a>.</div>
+
+  <h2>Team</h2>
+  <div class="table-wrap"><table>
+    <tr><th>Name</th><th>Main role</th><th>Presents in the video</th></tr>
+    <tr><td>Prince Emmanuel C. Lee</td><td><span class="fill">FILL: e.g. AI and integration engineer (base system, reskin, AWS wiring)</span></td><td><span class="fill">FILL: sections</span></td></tr>
+    <tr><td><span class="fill">FILL: partner's name</span></td><td><span class="fill">FILL: e.g. reliability engineer (dashboard, alarms, backups, automation, incident)</span></td><td><span class="fill">FILL: sections</span></td></tr>
+  </table></div>
+  <p>Shared: deployment, security and this website. Day-by-day contribution log: <a href="https://github.com/FILL/libralink-desk#contribution-log">README.md</a> <span class="fill">FILL: repo link</span>.</p>
+</main>
+<script src="assets/site.js"></script>
+</body>
+</html>

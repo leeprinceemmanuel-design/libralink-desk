@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Well-Architected review · LibraLink Desk</title>
+<link rel="icon" href="assets/favicon.png"><link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<main>
+  <div class="page-head">
+    <div class="kicker">WS-A item 6 · WS-G item 5 · Evidence E-17</div>
+    <h1>Well-Architected review</h1>
+    <p class="lead">The six pillars of the AWS Well-Architected Framework, used twice: once when the first deployment worked (to decide what to build next), and again after the incident was fixed.</p>
+  </div>
+
+  <div class="note"><b>Our deliberate trade-off.</b> We optimised for <b>Security</b> and <b>Operational Excellence</b>. We accepted a weaker <b>Reliability</b> design: one EC2 instance in one Availability Zone, with MongoDB on the same server. A second server, a load balancer and a managed database would roughly double the cost and the moving parts for a class-sized assistant. We cover the risk with hourly backups and a restore we have actually timed.</div>
+
+  <h2>Pass 1 — first working deployment (<span class="fill">FILL: date</span>)</h2>
+  <div class="table-wrap"><table>
+    <tr><th>Pillar</th><th>What our setup did at that point</th><th>Verdict</th><th>So we built next…</th></tr>
+    <tr><td>Operational Excellence</td><td>Started by a script and systemd; no dashboards, alarms or runbooks.</td><td><span class="verdict v-gap">gap</span></td><td>Dashboard, alarms, request logging, runbook.</td></tr>
+    <tr><td>Security</td><td>IAM users with MFA and admin role; secrets already in Parameter Store; but plain HTTP and port 80 open to the world; no trail.</td><td><span class="verdict v-adequate">adequate</span></td><td>CloudFront HTTPS, lock-down to CloudFront, CloudTrail, GuardDuty.</td></tr>
+    <tr><td>Reliability</td><td>Single server, no backups, no health checks, no log rotation.</td><td><span class="verdict v-gap">gap</span></td><td>Hourly backups + restore test, external health check.</td></tr>
+    <tr><td>Performance Efficiency</td><td>t3.medium picked as a safe starting size; no measurements yet.</td><td><span class="verdict v-adequate">adequate</span></td><td>Measure memory and answer time, then right-size.</td></tr>
+    <tr><td>Cost Optimization</td><td>Budget alert set on day 1; all resources tagged; nothing idle.</td><td><span class="verdict v-good">good</span></td><td>Check whether a smaller instance is enough.</td></tr>
+    <tr><td>Sustainability</td><td>One small instance, model hosted by the provider, no idle extras.</td><td><span class="verdict v-good">good</span></td><td>—</td></tr>
+  </table></div>
+
+  <h2>Pass 2 — after the incident (<span class="fill">FILL: date</span>)</h2>
+
+  <h3>Operational Excellence — <span class="verdict v-good">good</span></h3>
+  <p><b>The framework asks:</b> run and monitor the workload, automate changes, learn from failures. <b>We do:</b> a dashboard and 12 alarms e-mailing both of us; every answer logged with its timing, result and version; two automations running unattended; a real incident with root cause, prevention and a runbook. <b>Still weak:</b> code changes reach the server by a manual <code>git pull</code> and restart, not automatic deployment.</p>
+
+  <h3>Security — <span class="verdict v-good">good</span></h3>
+  <p><b>The framework asks:</b> strong identity, least privilege, protect data in transit and at rest, keep an audit trail. <b>We do:</b> own IAM user each with MFA, admin only through a 1-hour role that needs MFA, no access keys anywhere; secrets in Parameter Store; HTTPS for users; server reachable only from CloudFront, no SSH port; encrypted disk and bucket; CloudTrail and GuardDuty on. <b>Still weak:</b> the hop from CloudFront to the server is plain HTTP inside AWS's network.</p>
+
+  <h3>Reliability — <span class="verdict v-adequate">adequate</span> (accepted)</h3>
+  <p><b>The framework asks:</b> recover from failure automatically, test recovery, avoid single points of failure. <b>We do:</b> hourly backups to S3 with a tested restore (RTO <span class="fill">FILL</span> min, RPO up to 1 hour), Docker restarts crashed containers, systemd restarts the stack after a reboot, the health check notices outages from outside, log rotation prevents a full disk. <b>Accepted gap:</b> one server in one Availability Zone.</p>
+
+  <h3>Performance Efficiency — <span class="verdict v-adequate">adequate</span></h3>
+  <p><b>The framework asks:</b> right-size resources using data. <b>We do:</b> we measured memory (<span class="fill">FILL</span>% average) and CPU (<span class="fill">FILL</span>%) under our test load, and <span class="fill">FILL: resized to t3.small / kept t3.medium because …</span>. Average answer time <span class="fill">FILL</span> s, mostly spent waiting for the model. <b>Still weak:</b> no load test with many users at once.</p>
+
+  <h3>Cost Optimization — <span class="verdict v-good">good</span></h3>
+  <p><b>The framework asks:</b> pay only for what you use and know where the money goes. <b>We do:</b> a monthly budget with e-mails at 50/80/100%; every resource tagged <code>Project=SAM10</code>, <code>Team=libralink</code>; the model is on a free tier; CloudFront instead of a paid load balancer; backups expire after 8 days. Cost per day: <span class="fill">FILL before → after</span>. <b>Still weak:</b> the Elastic IP and instance cost money even at night when nobody uses the system.</p>
+
+  <h3>Sustainability — <span class="verdict v-good">good</span></h3>
+  <p><b>The framework asks:</b> the same results with a smaller footprint. <b>We do:</b> one small instance, no idle extra servers, the AI model shared on the provider's hardware instead of a GPU of our own, short log retention, conversation search (Meilisearch) switched off because nobody needed it. <b>Still weak:</b> the server runs 24 hours a day.</p>
+
+  <h3>What changed between the two passes</h3>
+  <div class="table-wrap"><table>
+    <tr><th>Pillar</th><th>Pass 1</th><th>Pass 2</th></tr>
+    <tr><td>Operational Excellence</td><td><span class="verdict v-gap">gap</span></td><td><span class="verdict v-good">good</span></td></tr>
+    <tr><td>Security</td><td><span class="verdict v-adequate">adequate</span></td><td><span class="verdict v-good">good</span></td></tr>
+    <tr><td>Reliability</td><td><span class="verdict v-gap">gap</span></td><td><span class="verdict v-adequate">adequate</span></td></tr>
+    <tr><td>Performance Efficiency</td><td><span class="verdict v-adequate">adequate</span></td><td><span class="verdict v-adequate">adequate</span></td></tr>
+    <tr><td>Cost Optimization</td><td><span class="verdict v-good">good</span></td><td><span class="verdict v-good">good</span></td></tr>
+    <tr><td>Sustainability</td><td><span class="verdict v-good">good</span></td><td><span class="verdict v-good">good</span></td></tr>
+  </table></div>
+
+  <h2>The one gap we would fix first</h2>
+  <p><b>Reliability: the single server.</b> Everything else on this page is "good enough" for a class project, but if our one instance or its Availability Zone fails, users get nothing until we rebuild — about <span class="fill">FILL: RTO</span> minutes plus launching a new server. The first fix is cheap: an EC2 Auto Scaling group of one instance with a launch template that runs our bootstrap script, so a dead server is replaced automatically; MongoDB data would move to a separate EBS volume with snapshots (or to a managed MongoDB-compatible database). That turns "we restore by hand" into "it heals itself".</p>
+
+  <p class="stat-label"><span class="fill">FILL (optional, same credit): link to the report from the free AWS Well-Architected Tool if you also record these answers there.</span></p>
+</main>
+<script src="assets/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Monitoring, backup and security · LibraLink Desk</title>
+<link rel="icon" href="assets/favicon.png"><link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<main>
+  <div class="page-head">
+    <div class="kicker">WS-B · WS-C · WS-D · Evidence E-06 to E-13</div>
+    <h1>Monitoring, backup and restore, security</h1>
+    <p class="lead">How we see that LibraLink Desk is working, how we get it back when it breaks, and how we keep the wrong people out.</p>
+  </div>
+
+  <h2 id="monitoring">1. Monitoring (WS-B)</h2>
+
+  <h3>The dashboard</h3>
+  <figure class="ev"><img src="evidence/E-06-dashboard.png" alt="CloudWatch dashboard libralink-ops with real data">
+    <div class="ev-missing">📷 Add <code>evidence/E-06-dashboard.png</code>: CloudWatch › Dashboards › libralink-ops, time range 1 day or 3 days, with real data in the graphs (ask the assistant some questions first).</div>
+    <figcaption><b>E-06</b> Dashboard <code>libralink-ops</code>: requests and answers, errors, answer time, CPU, disk and memory, health check, backup size, "not in handbook" answers, and all alarms. Range: <span class="fill">FILL: dates</span>.</figcaption></figure>
+
+  <h3>Where the numbers come from</h3>
+  <ul>
+    <li><b>EC2 basics</b> (CPU, status checks) come from AWS automatically.</li>
+    <li><b>Memory, disk and swap</b> come from the CloudWatch agent on the server (<code>ops/cloudwatch-agent.json</code>).</li>
+    <li><b>Answer metrics</b> come from our request logger (<code>ops/exporter.py</code>). Every minute it writes one JSON line per answer to the log group <code>/libralink/requests</code>; metric filters turn those lines into <code>AnswersTotal</code>, <code>AnswersFailed</code>, <code>EmptyAnswer</code>, <code>NotFound</code>, <code>AnswerDurationMs</code> and <code>PIIFlagged</code>. That gives us the brief's "custom metric counting failed answers" (WS-B item 6) without changing LibreChat's code.</li>
+    <li><b>Request count and HTTP errors</b> come from nginx's JSON access log (<code>/libralink/nginx</code>).</li>
+    <li><b>Health check</b> comes from a Lambda function outside the server (see <a href="automation.html">Automation</a>).</li>
+  </ul>
+
+  <h3>The alarms, and why each threshold</h3>
+  <div class="table-wrap"><table>
+    <tr><th>Alarm</th><th>Fires when</th><th>Why this threshold</th></tr>
+    <tr><td>libralink-cpu-high</td><td>CPU &gt; 85% for 10 min</td><td>The brief's starter value; short spikes during answers are normal, 10 minutes of it is a stuck process.</td></tr>
+    <tr><td>libralink-status-check-failed</td><td>EC2 status check fails for 2 min</td><td>Any failure means the machine or its host is broken.</td></tr>
+    <tr><td>libralink-disk-high</td><td>Root disk &gt; 85% for 3 min</td><td>Same 85% as the brief, but checked every minute instead of hourly: our incident showed a disk can fill in minutes.</td></tr>
+    <tr><td>libralink-memory-high</td><td>Memory &gt; 90% for 5 min</td><td>Brief's value; above this the app is close to being killed.</td></tr>
+    <tr><td>libralink-answers-failed-rate</td><td>&gt; 5% of answers failed in 15 min</td><td>Brief's value; catches "up but not working" (e.g. a bad API key).</td></tr>
+    <tr><td>libralink-empty-answer</td><td>Any empty answer in 30 min</td><td>Brief's value; an empty answer is never correct.</td></tr>
+    <tr><td>libralink-notfound-spike</td><td>&gt; 50% "not in the handbook" answers in 30 min (min. 4 answers)</td><td>If the handbook did not load, almost every answer becomes "not found".</td></tr>
+    <tr><td>libralink-slow-answers</td><td>Average answer time &gt; 20 s over 15 min</td><td>We changed the brief's 3 s: AI answers stream for several seconds, so 3 s would fire all the time. <span class="fill">FILL: our measured normal average was N s.</span></td></tr>
+    <tr><td>libralink-nginx-5xx</td><td>Any HTTP 5xx in 5 min</td><td>Replaces the load-balancer 5xx alarm (we have no load balancer).</td></tr>
+    <tr><td>libralink-healthcheck-failed</td><td>Health check failed, or did not run, in 30 min</td><td>Two missed checks in a row — the site is down for users.</td></tr>
+    <tr><td>libralink-backup-missing</td><td>No successful backup in 2 hours</td><td>Backups run hourly, so two missing hours means the automation broke.</td></tr>
+    <tr><td>libralink-pii-detected</td><td>A question looked like it held personal data</td><td>Our responsible-use check (WS-D item 4).</td></tr>
+  </table></div>
+  <p>The billing alarm from the brief's starter set is covered by our AWS Budgets alert (set on day 1). All alarms send to the SNS topic <code>libralink-alerts</code>, which e-mails both of us, and also e-mail when the alarm goes back to OK.</p>
+
+  <figure class="ev"><img src="evidence/E-07-alarms.png" alt="CloudWatch alarms list">
+    <div class="ev-missing">📷 Add <code>evidence/E-07-alarms.png</code>: CloudWatch › Alarms › All alarms, filtered by "libralink", showing all 12 and their state.</div>
+    <figcaption><b>E-07</b> The 12 alarms.</figcaption></figure>
+
+  <h3>Proof that an alert reached a real person</h3>
+  <figure class="ev"><img src="evidence/E-08-alert-email.png" alt="Alarm email in the inbox with date and time">
+    <div class="ev-missing">📷 Add <code>evidence/E-08-alert-email.png</code>: the "ALARM: libralink-disk-high" e-mail (from the incident) open in your inbox, with the date and time visible. Blur your e-mail address if you like.</div>
+    <figcaption><b>E-08</b> Alarm e-mail received <span class="fill">FILL: date, time</span> — and what we did about it: see the <a href="automation.html#incident">incident</a>.</figcaption></figure>
+
+  <h3>Request log</h3>
+  <figure class="ev"><img src="evidence/E-09-request-log.png" alt="Request log lines in CloudWatch Logs">
+    <div class="ev-missing">📷 Add <code>evidence/E-09-request-log.png</code>: CloudWatch › Log groups › /libralink/requests, a few expanded JSON lines (question, duration_ms, success, model, app_version).</div>
+    <figcaption><b>E-09</b> One line per answer: the question, how long it took, whether it succeeded, and which version answered. Retention 14 days.</figcaption></figure>
+  <p>Example line (format):</p>
+  <pre>{"ts": "…", "event": "answer", "question": "How many books can an undergraduate borrow?",
+ "duration_ms": 3120, "success": true, "empty": false, "not_found": false,
+ "model": "gemini-2.5-flash", "app_version": "v1.0", "content_hash": "321dc861fc48", "pii_flag": false}</pre>
+  <p>Log groups and retention: <code>/libralink/app</code> and <code>/libralink/mongodb</code> (container logs), <code>/libralink/requests</code>, <code>/libralink/nginx</code> — 14 days; <code>/libralink/automation</code> and <code>/aws/lambda/libralink-healthcheck</code> — 30 days.</p>
+
+  <h2 id="backup">2. Backup and restore (WS-C)</h2>
+
+  <h3>What would have to be restored</h3>
+  <div class="table-wrap"><table>
+    <tr><th>Thing</th><th>Where it lives</th><th>How it is protected</th></tr>
+    <tr><td>Database (accounts, conversations, messages)</td><td>MongoDB container on the server</td><td><code>mongodump</code> to S3 every hour, kept 7 days</td></tr>
+    <tr><td>Handbook content</td><td>S3 <code>content/</code></td><td>S3 versioning on; old versions kept 30 days; also in git</td></tr>
+    <tr><td>Settings</td><td>Parameter Store <code>/libralink/config/*</code></td><td>Parameter history; list of names exported to S3 hourly; values also written in <code>ops/aws/04-params.sh</code></td></tr>
+    <tr><td>Secrets</td><td>Parameter Store <code>/libralink/secret/*</code></td><td>Parameter history (AWS keeps old versions). The Gemini key can be re-issued in Google AI Studio. <code>CREDS_KEY</code>/<code>CREDS_IV</code> mainly encrypt API keys that users store themselves, which we do not allow, so losing them does little harm. Losing the JWT secrets only logs everyone out.</td></tr>
+    <tr><td>The server itself</td><td>EC2</td><td>Not backed up — rebuilt from code: <code>ops/aws/06-ec2.sh</code> + <code>ops/bootstrap-ec2.sh</code> + <code>app/docker-compose.yml</code> (brief WS-C item 6: "rebuilt rather than merely restored").</td></tr>
+  </table></div>
+
+  <h3>Backup settings</h3>
+  <figure class="ev"><img src="evidence/E-10-backups-s3.png" alt="Hourly backup files in S3 and versioning enabled">
+    <div class="ev-missing">📷 Add <code>evidence/E-10-backups-s3.png</code>: S3 › libralink-content-… › backups/mongo/ listing several hourly files, plus the bucket's Properties showing Bucket Versioning: Enabled (or the output of <code>bash ops/aws/12-evidence.sh</code>, section E-10).</div>
+    <figcaption><b>E-10</b> Hourly database dumps in S3, versioning enabled, lifecycle rule deleting backups after 8 days.</figcaption></figure>
+  <p>Why not RDS automated backups? LibreChat needs MongoDB, which RDS does not run, so the brief's alternative applies: "a scheduled dump to S3 kept for at least 7 days". Deletion protection's equivalent here is S3 versioning (a deleted backup can be recovered) and the instance role, which can write backups but cannot delete them.</p>
+
+  <h3>The restore test</h3>
+  <p>On <span class="fill">FILL: date, time</span> we ran <code>sudo /opt/libralink/ops/restore-test.sh full</code>. It stopped the app, moved the live database aside, started an <b>empty</b> database, restored the newest backup from S3 (<code><span class="fill">FILL: file name</span></code>), and started the app again. We then logged in and our earlier conversations were there.</p>
+  <figure class="ev"><img src="evidence/E-11-restore.png" alt="Restore test output with document counts and timing">
+    <div class="ev-missing">📷 Add <code>evidence/E-11-restore.png</code>: the terminal output of the restore test (counts before, empty, after, and the total seconds) AND a screenshot of the app after logging in showing old conversations in the sidebar.</div>
+    <figcaption><b>E-11</b> Counts before: <span class="fill">FILL users/conversations/messages</span>; after restore: <span class="fill">FILL</span>. Total time <span class="fill">FILL</span> s.</figcaption></figure>
+
+  <h3>How much we could lose, and how long it takes</h3>
+  <p><b>RPO (how much we would lose):</b> up to 1 hour of conversations, because the database is backed up every hour; the handbook and settings, almost nothing, because S3 and Parameter Store keep versions.
+  <b>RTO (how long until it works again):</b> <span class="fill">FILL: N</span> minutes measured for a database restore on a running server; rebuilding a lost server from our scripts adds about <span class="fill">FILL: 10–15</span> minutes.</p>
+
+  <h2 id="security">3. Security (WS-D)</h2>
+
+  <h3>Before and after</h3>
+  <div class="table-wrap"><table>
+    <tr><th>Problem found</th><th>Before</th><th>After</th></tr>
+    <tr><td>Who can change things</td><td>Root user only</td><td>One IAM user each, MFA on, admin rights only through the <code>SAM10-Admin</code> role (MFA required, 1 hour max); root not used</td></tr>
+    <tr><td>Access keys</td><td>—</td><td>None at all: all command-line work in CloudShell after switching role</td></tr>
+    <tr><td>Traffic to users</td><td>Plain HTTP</td><td>HTTPS via CloudFront; HTTP redirected</td></tr>
+    <tr><td>Server exposure</td><td>Port 80 open to <code>0.0.0.0/0</code></td><td>Port 80 only from CloudFront's managed address list; no SSH port; Session Manager for admin</td></tr>
+    <tr><td>Database exposure</td><td>Not published (LibreChat default)</td><td>Still not published: MongoDB is only on the private Docker network</td></tr>
+    <tr><td>Secrets</td><td>Would normally sit in LibreChat's <code>.env</code> file</td><td>In Parameter Store (SecureString); read into memory at start-up; git history scanned</td></tr>
+    <tr><td>Server permissions</td><td>—</td><td>Instance role limited to our parameters, our bucket's <code>content/</code> and <code>backups/</code>, our log groups, metrics and one SNS topic</td></tr>
+    <tr><td>Audit trail</td><td>90-day event history only</td><td>CloudTrail trail with log-file validation, own private bucket</td></tr>
+    <tr><td>Data at rest</td><td>—</td><td>EBS encryption by default; S3 encryption; GuardDuty on</td></tr>
+    <tr><td>Public sign-up</td><td>Anyone could register</td><td>Registration off; we create accounts</td></tr>
+  </table></div>
+
+  <h3>Each control, and the risk it addresses</h3>
+  <ul>
+    <li><b>MFA on every console user</b> — a stolen password alone is not enough to get in.</li>
+    <li><b>Own IAM user each, admin via role</b> — we can see who did what, and nobody walks around with admin rights all day.</li>
+    <li><b>No keys in code or git history</b> — a public repository cannot leak our Gemini key; <code>ops/check-secrets.sh</code> scans every commit.</li>
+    <li><b>Personal-data check</b> — questions that look like they contain an e-mail, phone or ID number are redacted in our logs and raise an alarm, so we notice if anyone sends personal data to the external model.</li>
+    <li><b>Server only reachable from CloudFront, database not reachable at all</b> — attackers cannot skip HTTPS or reach MongoDB directly.</li>
+    <li><b>Least-privilege server role</b> — if the server were taken over, the attacker could not touch other buckets, delete backups or create users.</li>
+    <li><b>IMDSv2 required</b> — blocks a common trick for stealing the server's AWS credentials.</li>
+    <li><b>CloudTrail</b> — every change in the account is recorded, so we can investigate.</li>
+    <li><b>Encryption at rest + GuardDuty</b> — a lost disk or snapshot is unreadable; suspicious activity is flagged. GuardDuty findings: <span class="fill">FILL: "none" or explain each</span>.</li>
+    <li><b>Gemini key scope</b> — the key belongs to a Google project used only for this assistant, so a leak cannot touch anything else. <span class="fill">FILL: confirm what you did: no billing attached to that Google project (free tier only), and the key restricted to the Generative Language API in Google Cloud console › Credentials.</span></li>
+  </ul>
+
+  <div class="pair">
+    <figure class="ev"><img src="evidence/E-12-iam-mfa.png" alt="IAM users with MFA">
+      <div class="ev-missing">📷 Add <code>evidence/E-12-iam-mfa.png</code>: IAM › Users list showing both users with MFA "Virtual", and no access keys (or the E-12 section of <code>12-evidence.sh</code>).</div>
+      <figcaption><b>E-12</b> Our IAM users, MFA on, no access keys.</figcaption></figure>
+    <figure class="ev"><img src="evidence/E-13-parameter-store.png" alt="Parameter Store list of names">
+      <div class="ev-missing">📷 Add <code>evidence/E-13-parameter-store.png</code>: Systems Manager › Parameter Store list (names and types only — NEVER click "Show" on a SecureString value).</div>
+      <figcaption><b>E-13</b> Settings and secrets in Parameter Store.</figcaption></figure>
+  </div>
+  <figure class="ev"><img src="evidence/E-13b-secret-scan.png" alt="Secret scan output">
+    <div class="ev-missing">📷 Add <code>evidence/E-13b-secret-scan.png</code>: output of <code>bash ops/check-secrets.sh</code> showing "clean" for files and for N commits.</div>
+    <figcaption><b>E-13b</b> No secrets in the files or in any commit.</figcaption></figure>
+</main>
+<script src="assets/site.js"></script>
+</body>
+</html>

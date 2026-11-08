@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AWS infrastructure design · LibraLink Desk</title>
+<link rel="icon" href="assets/favicon.png"><link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<main>
+  <div class="page-head">
+    <div class="kicker">WS-A item 4 · Evidence E-18</div>
+    <h1>AWS infrastructure design</h1>
+    <p class="lead">Where every part of LibraLink Desk runs, and how one question travels from the user to the AI model and back. One region, one server, one database — on purpose.</p>
+  </div>
+
+  <div class="diagram" role="img" aria-label="Architecture diagram of LibraLink Desk on AWS">
+  <svg viewBox="0 0 1200 720" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" style="fill: var(--teal)"/></marker>
+      <marker id="arr2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" style="fill: var(--ink-soft)"/></marker>
+    </defs>
+
+    <!-- outside AWS -->
+    <rect class="d-ext" x="20" y="250" width="140" height="76" rx="10"/>
+    <text class="d-t" x="34" y="280">Library user</text>
+    <text class="d-s" x="34" y="300">web browser</text>
+
+    <rect class="d-ext" x="20" y="520" width="150" height="96" rx="10"/>
+    <text class="d-t" x="34" y="548">Google Gemini API</text>
+    <text class="d-s" x="34" y="568">external AI model</text>
+    <text class="d-s" x="34" y="586">free tier, outside AWS</text>
+    <text class="d-s" x="34" y="604">invented data only</text>
+
+    <rect class="d-box" x="200" y="250" width="170" height="76" rx="10"/>
+    <text class="d-t" x="214" y="278">Amazon CloudFront</text>
+    <text class="d-s" x="214" y="297">HTTPS, free certificate</text>
+    <text class="d-s" x="214" y="314">caching off</text>
+
+    <!-- region -->
+    <rect class="d-region" x="395" y="20" width="680" height="690" rx="16"/>
+    <text class="d-frame-t" x="412" y="44">AWS REGION ap-southeast-1 (SINGAPORE)</text>
+
+    <rect class="d-frame" x="410" y="60" width="350" height="480" rx="12"/>
+    <text class="d-frame-t" x="424" y="82">DEFAULT VPC · PUBLIC SUBNET</text>
+    <rect class="d-sg" x="425" y="94" width="320" height="432" rx="10"/>
+    <text class="d-s" x="438" y="114">Security group: port 80 from CloudFront only, no SSH</text>
+
+    <rect class="d-box" x="440" y="126" width="290" height="386" rx="10"/>
+    <text class="d-t" x="455" y="150">EC2 · libralink-server</text>
+    <text class="d-s" x="455" y="168">Amazon Linux 2023 · encrypted disk · Elastic IP</text>
+
+    <rect class="d-box-alt" x="460" y="186" width="250" height="56" rx="8"/>
+    <text class="d-t" x="474" y="209">nginx (container)</text>
+    <text class="d-s" x="474" y="228">LibraLink theme + logo · JSON access log</text>
+
+    <rect class="d-box-alt" x="460" y="258" width="250" height="56" rx="8"/>
+    <text class="d-t" x="474" y="281">LibreChat → LibraLink Desk</text>
+    <text class="d-s" x="474" y="300">reskinned UI · handbook in the prompt</text>
+
+    <rect class="d-box-alt" x="460" y="330" width="250" height="56" rx="8"/>
+    <text class="d-t" x="474" y="353">MongoDB (container)</text>
+    <text class="d-s" x="474" y="372">users · conversations · messages</text>
+
+    <rect class="d-box-alt" x="460" y="402" width="250" height="96" rx="8"/>
+    <text class="d-t" x="474" y="424">On the server (systemd)</text>
+    <text class="d-s" x="474" y="443">CloudWatch agent: memory, disk, logs</text>
+    <text class="d-s" x="474" y="460">request logger, every minute</text>
+    <text class="d-s" x="474" y="477">database backup to S3, every hour</text>
+    <text class="d-s" x="474" y="494">Session Manager login (no SSH keys)</text>
+
+    <!-- regional services -->
+    <rect class="d-box" x="790" y="60" width="270" height="70" rx="10"/>
+    <text class="d-t" x="804" y="86">Amazon S3 · libralink-content</text>
+    <text class="d-s" x="804" y="106">handbook files (versioned)</text>
+    <text class="d-s" x="804" y="122">database backups, kept 7 days</text>
+
+    <rect class="d-box" x="790" y="145" width="270" height="70" rx="10"/>
+    <text class="d-t" x="804" y="171">SSM Parameter Store</text>
+    <text class="d-s" x="804" y="191">settings (String)</text>
+    <text class="d-s" x="804" y="207">secrets (SecureString, KMS)</text>
+
+    <rect class="d-box" x="790" y="230" width="270" height="80" rx="10"/>
+    <text class="d-t" x="804" y="256">Amazon CloudWatch</text>
+    <text class="d-s" x="804" y="276">metrics · log groups (14-30 days)</text>
+    <text class="d-s" x="804" y="294">12 alarms · dashboard libralink-ops</text>
+
+    <rect class="d-box" x="790" y="330" width="270" height="60" rx="10"/>
+    <text class="d-t" x="804" y="356">Amazon SNS · libralink-alerts</text>
+    <text class="d-s" x="804" y="376">emails both team members</text>
+
+    <rect class="d-box" x="790" y="410" width="270" height="86" rx="10"/>
+    <text class="d-t" x="804" y="436">AWS Lambda · health check</text>
+    <text class="d-s" x="804" y="456">run by EventBridge every 15 min</text>
+    <text class="d-s" x="804" y="474">opens the HTTPS site like a user</text>
+    <text class="d-s" x="804" y="490">→ HealthCheckOK metric</text>
+
+    <rect class="d-ext" x="1090" y="330" width="96" height="60" rx="10"/>
+    <text class="d-t" x="1102" y="356">Team inbox</text>
+    <text class="d-s" x="1102" y="375">alert emails</text>
+
+    <!-- account-wide -->
+    <text class="d-frame-t" x="412" y="566">ACCOUNT-WIDE CONTROLS</text>
+    <rect class="d-box-alt" x="410" y="578" width="152" height="70" rx="8"/>
+    <text class="d-t" x="422" y="602">IAM</text>
+    <text class="d-s" x="422" y="620">own user each + MFA</text>
+    <text class="d-s" x="422" y="637">admin = role switch</text>
+    <rect class="d-box-alt" x="575" y="578" width="152" height="70" rx="8"/>
+    <text class="d-t" x="587" y="602">CloudTrail</text>
+    <text class="d-s" x="587" y="620">who did what, when</text>
+    <rect class="d-box-alt" x="740" y="578" width="152" height="70" rx="8"/>
+    <text class="d-t" x="752" y="602">GuardDuty</text>
+    <text class="d-s" x="752" y="620">threat findings</text>
+    <rect class="d-box-alt" x="905" y="578" width="155" height="70" rx="8"/>
+    <text class="d-t" x="917" y="602">AWS Budgets</text>
+    <text class="d-s" x="917" y="620">monthly cost alert</text>
+
+    <!-- the question path -->
+    <path class="d-arrow" d="M162 288 L198 288" style="marker-start: url(#arr)"/>
+    <path class="d-arrow" d="M370 288 L418 288 L418 214 L458 214" style="marker-start: url(#arr)"/>
+    <path class="d-arrow" d="M585 243 L585 256"/>
+    <path class="d-arrow" d="M460 300 L392 300 L392 568 L172 568" style="marker-start: url(#arr)"/>
+    <path class="d-arrow" d="M585 315 L585 328"/>
+
+    <g><circle class="d-num" cx="180" cy="270" r="11"/><text class="d-num-t" x="176" y="275">1</text></g>
+    <g><circle class="d-num" cx="394" cy="270" r="11"/><text class="d-num-t" x="390" y="275">2</text></g>
+    <g><circle class="d-num" cx="612" cy="250" r="11"/><text class="d-num-t" x="608" y="255">3</text></g>
+    <g><circle class="d-num" cx="392" cy="440" r="11"/><text class="d-num-t" x="388" y="445">4</text></g>
+    <g><circle class="d-num" cx="612" cy="322" r="11"/><text class="d-num-t" x="608" y="327">5</text></g>
+
+    <!-- operations paths (dashed) -->
+    <path class="d-arrow-ops" d="M730 140 L760 140 L760 95 L788 95" style="marker-start: url(#arr2)"/>
+    <path class="d-arrow-ops" d="M788 180 L732 180"/>
+    <path class="d-arrow-ops" d="M730 270 L788 270"/>
+    <path class="d-arrow-ops" d="M925 310 L925 328"/>
+    <path class="d-arrow-ops" d="M1060 453 L1068 453 L1068 270 L1062 270"/>
+    <path class="d-arrow-ops" d="M1060 360 L1088 360"/>
+  </svg>
+  </div>
+  <p class="stat-label">Solid arrows: the path of a question (numbers match the list below). Dashed arrows: operations traffic — content and backups, secrets, metrics and logs, alerts.</p>
+
+  <h2>How a question travels</h2>
+  <ol>
+    <li><b>Browser → CloudFront (HTTPS).</b> The user opens the <code>…cloudfront.net</code> address. CloudFront holds the free HTTPS certificate and forwards every request (no caching, because every chat is different).</li>
+    <li><b>CloudFront → nginx on EC2 (port 80).</b> The security group only lets in CloudFront's own address list, so nobody can reach the server directly. nginx adds the LibraLink theme and logo to the page and writes one log line per request.</li>
+    <li><b>nginx → LibreChat.</b> LibreChat checks the user is logged in. Because our model spec is enforced, every chat uses the LibraLink Desk preset: our rules plus the whole library handbook, which the server downloaded from S3 when it started.</li>
+    <li><b>LibreChat → Google Gemini (HTTPS) and back.</b> The question and the handbook go out to Gemini, outside AWS. The answer streams back word by word through nginx and CloudFront to the browser.</li>
+    <li><b>LibreChat → MongoDB.</b> The question and answer are saved. Every minute the request logger reads new answers and writes one JSON line each (question, time taken, success, model and content version) to <code>/libralink/requests</code> in CloudWatch.</li>
+  </ol>
+
+  <h2>Every service, and what it is for</h2>
+  <div class="table-wrap"><table>
+    <tr><th>Service</th><th>What we run</th><th>Why</th></tr>
+    <tr><td>EC2</td><td><code>libralink-server</code>, Amazon Linux 2023, <span class="fill">FILL: t3.medium or t3.small after right-sizing</span>, 20 GB gp3 encrypted, IMDSv2 required, Elastic IP</td><td>Runs the three containers. One server is enough for a class-sized load.</td></tr>
+    <tr><td>Docker containers</td><td>nginx 1.27, LibreChat <span class="fill">FILL: exact version from the login page or <code>docker inspect</code></span>, MongoDB 8.0</td><td>LibreChat ships as containers; one <code>docker compose</code> file starts the stack.</td></tr>
+    <tr><td>CloudFront</td><td>One distribution, HTTPS only, caching disabled, origin = the Elastic IP's DNS name</td><td>Free HTTPS without buying a domain; hides the server behind AWS's edge.</td></tr>
+    <tr><td>S3</td><td><code>libralink-content-&lt;account&gt;</code>: <code>content/</code> (handbook) and <code>backups/</code></td><td>The handbook lives outside the server, versioned; backups survive the server being lost.</td></tr>
+    <tr><td>Systems Manager</td><td>Parameter Store (<code>/libralink/config/*</code>, <code>/libralink/secret/*</code>) and Session Manager</td><td>No keys in code; no SSH keys or open SSH port.</td></tr>
+    <tr><td>CloudWatch</td><td>Agent metrics, 6 log groups, metric filters, 12 alarms, dashboard</td><td>See it working (WS-B).</td></tr>
+    <tr><td>SNS</td><td>Topic <code>libralink-alerts</code> with both e-mail addresses</td><td>Alarms reach real people.</td></tr>
+    <tr><td>Lambda + EventBridge</td><td><code>libralink-healthcheck</code>, every 15 minutes</td><td>Checks the public site from outside the server.</td></tr>
+    <tr><td>IAM, CloudTrail, GuardDuty, Budgets</td><td>Per-person users with MFA and an admin role; one trail; GuardDuty detector; a monthly budget</td><td>Security and cost controls (WS-D, section 6).</td></tr>
+    <tr><td>Not used (and why)</td><td>RDS, load balancer, Kubernetes, a second region</td><td>LibreChat's database is MongoDB, which RDS does not run; one server needs no load balancer. Keeping it small is a brief requirement.</td></tr>
+  </table></div>
+
+  <div class="note"><b>Change log of this design.</b> v1 (<span class="fill">FILL: date</span>): first deployment, port 80 open to everyone (baseline). v2 (<span class="fill">FILL: date</span>): CloudFront HTTPS added, port 80 limited to CloudFront. v3 (<span class="fill">FILL: date</span>): log rotation added after the disk-full incident<span class="fill">FILL (if done): , instance resized to t3.small</span>.</div>
+</main>
+<script src="assets/site.js"></script>
+</body>
+</html>

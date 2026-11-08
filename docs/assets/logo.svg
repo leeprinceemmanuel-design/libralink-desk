@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="LibraLink Desk logo">
+  <!-- Original LibraLink Desk mark: an open book whose spine is a chain link. -->
+  <rect x="4" y="4" width="120" height="120" rx="28" fill="#0F5257"/>
+  <!-- left page -->
+  <path d="M22 40 C36 34 50 35 62 42 L62 94 C50 87 36 86 22 92 Z" fill="#FBF7EF"/>
+  <!-- right page -->
+  <path d="M106 40 C92 34 78 35 66 42 L66 94 C78 87 92 86 106 92 Z" fill="#F3EDE1"/>
+  <!-- text lines -->
+  <g stroke="#9FB9B7" stroke-width="3" stroke-linecap="round">
+    <path d="M31 52 C38 50 45 50 53 53"/>
+    <path d="M31 62 C38 60 45 60 53 63"/>
+    <path d="M75 53 C83 50 90 50 97 52"/>
+    <path d="M75 63 C83 60 90 60 97 62"/>
+  </g>
+  <!-- chain link on the spine -->
+  <g fill="none" stroke="#E8A33D" stroke-width="7" stroke-linecap="round">
+    <rect x="52" y="60" width="24" height="16" rx="8" transform="rotate(-35 64 68)"/>
+    <rect x="52" y="74" width="24" height="16" rx="8" transform="rotate(-35 64 82)"/>
+  </g>
+</svg>

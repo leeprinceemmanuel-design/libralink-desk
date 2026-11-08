@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Baseline · LibraLink Desk</title>
+<link rel="icon" href="assets/favicon.png"><link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<main>
+  <div class="page-head">
+    <div class="kicker">WS-G item 4</div>
+    <h1>Baseline: the environment before we touched it</h1>
+    <p class="lead">What LibreChat and our AWS account looked like at the start, recorded so the improvements on the other pages can be measured against something real.</p>
+  </div>
+
+  <h2>When and how we recorded it</h2>
+  <p>Baseline taken on <span class="fill">FILL: date and time</span>, at two moments: (1) stock LibreChat running on our laptop with no changes, and (2) the first AWS deployment straight after <code>ops/aws/06-ec2.sh</code>, before HTTPS, lock-down, monitoring or backups were added.</p>
+
+  <h2>What we found</h2>
+  <div class="table-wrap"><table>
+    <tr><th>Area</th><th>Baseline state</th><th>Why it matters</th></tr>
+    <tr><td>Application</td><td>Stock LibreChat: its own name and logo, model picker, agents, presets, public sign-up page, no system prompt, no knowledge of any library.</td><td>Not our system, and every enabled feature is something to secure.</td></tr>
+    <tr><td>Address</td><td>Plain <code>http://ec2-…compute.amazonaws.com</code> — no padlock, browser shows "Not secure".</td><td>Passwords and chats cross the internet unencrypted.</td></tr>
+    <tr><td>Network</td><td>Security group: port 80 open to <code>0.0.0.0/0</code> (the whole internet).</td><td>Anyone can reach the server directly, bypassing anything put in front of it.</td></tr>
+    <tr><td>AWS account</td><td>Root user only. Root MFA: <span class="fill">FILL: on / off when you started</span>. No IAM users, no CloudTrail trail (only the default 90-day event history).</td><td>One shared all-powerful login, no proper audit trail.</td></tr>
+    <tr><td>Monitoring</td><td>Only the default EC2 metrics (CPU, network). No memory or disk metrics, no alarms, no dashboard, no application logs in CloudWatch.</td><td>A crash or full disk would go unnoticed until a user complained.</td></tr>
+    <tr><td>Backups</td><td>None. The database lives only on the server's disk.</td><td>Losing the server means losing every account and conversation.</td></tr>
+    <tr><td>Logs</td><td>Log files under <code>/var/log/libralink</code> with no size limit or rotation.</td><td>A runaway log can fill the disk (this became our incident).</td></tr>
+    <tr><td>Cost</td><td><span class="fill">FILL: instance type and the daily cost from Cost Explorer for the first full day</span>; a USD <span class="fill">FILL: 10</span> budget alert was set before anything else (day 1, step 1).</td><td>Brief section 6: set a budget alert on day one.</td></tr>
+  </table></div>
+
+  <h2>Baseline evidence</h2>
+  <div class="pair">
+    <figure class="ev"><img src="evidence/B-01-http-not-secure.png" alt="Browser showing Not secure on plain HTTP">
+      <div class="ev-missing">📷 Add <code>evidence/B-01-http-not-secure.png</code>: the app opened at http://ec2-… with the browser's "Not secure" label visible.</div>
+      <figcaption><b>B-01</b> First deployment on plain HTTP.</figcaption></figure>
+    <figure class="ev"><img src="evidence/B-02-sg-open.png" alt="Security group with port 80 open to 0.0.0.0/0">
+      <div class="ev-missing">📷 Add <code>evidence/B-02-sg-open.png</code>: EC2 › Security groups › libralink-web-sg › Inbound rules, showing 80 from 0.0.0.0/0.</div>
+      <figcaption><b>B-02</b> Port 80 open to the whole internet at first.</figcaption></figure>
+  </div>
+  <figure class="ev"><img src="evidence/B-03-baseline-metrics.png" alt="Default EC2 monitoring tab with no alarms">
+    <div class="ev-missing">📷 Add <code>evidence/B-03-baseline-metrics.png</code>: EC2 › Instances › libralink-server › Monitoring tab (and/or CloudWatch › Alarms showing zero alarms).</div>
+    <figcaption><b>B-03</b> Only default metrics and no alarms before WS-B.</figcaption></figure>
+
+  <h2>Baseline numbers (same measures as the Results page)</h2>
+  <div class="table-wrap"><table>
+    <tr><th>Measure</th><th>Baseline value</th><th>Period</th></tr>
+    <tr><td>Alarms / time to detect a full disk</td><td>0 alarms / never</td><td>—</td></tr>
+    <tr><td>Backups / restore tested</td><td>0 / no</td><td>—</td></tr>
+    <tr><td>Answer quality</td><td>Stock LibreChat had no library knowledge: <span class="fill">FILL: optional — ask 3 handbook questions on the stock app and count correct</span></td><td><span class="fill">FILL</span></td></tr>
+    <tr><td>Average answer time</td><td><span class="fill">FILL from the dashboard</span></td><td><span class="fill">FILL: date range</span></td></tr>
+    <tr><td>Memory used on <span class="fill">t3.medium</span></td><td><span class="fill">FILL: average %</span></td><td><span class="fill">FILL: date range</span></td></tr>
+    <tr><td>Cost per day</td><td><span class="fill">FILL: USD</span></td><td><span class="fill">FILL: date</span></td></tr>
+  </table></div>
+</main>
+<script src="assets/site.js"></script>
+</body>
+</html>

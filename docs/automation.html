@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Automation and the incident · LibraLink Desk</title>
+<link rel="icon" href="assets/favicon.png"><link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<main>
+  <div class="page-head">
+    <div class="kicker">WS-E · WS-F · Evidence E-14, E-15</div>
+    <h1>Automation, and the incident</h1>
+    <p class="lead">Two jobs that run without anyone touching them, and one real fault we caused, found, fixed and prevented.</p>
+  </div>
+
+  <h2 id="automation">1. Two automations (WS-E)</h2>
+  <div class="grid">
+    <div class="card">
+      <h3>A. Hourly backup</h3>
+      <p><b>What:</b> dumps the MongoDB database straight to S3, checks the file is not empty, and saves the list of Parameter Store settings. E-mails us if any step fails.</p>
+      <p><b>How it runs:</b> systemd timer <code>libralink-backup.timer</code> on the server, at 5 minutes past every hour.</p>
+      <p><b>Code:</b> <code>ops/backup.sh</code>, <code>ops/systemd/libralink-backup.*</code></p>
+      <p><b>Watched by:</b> alarm <code>libralink-backup-missing</code>.</p>
+    </div>
+    <div class="card">
+      <h3>B. Health check from outside</h3>
+      <p><b>What:</b> a Lambda function opens the public HTTPS site like a user: <code>/health</code> must say OK and the home page must contain our theme. Publishes <code>HealthCheckOK</code> (1 or 0) and the response time.</p>
+      <p><b>How it runs:</b> EventBridge rule <code>libralink-healthcheck-15min</code>, every 15 minutes.</p>
+      <p><b>Code:</b> <code>ops/lambda/healthcheck.py</code>, deployed by <code>ops/aws/10-healthcheck.sh</code></p>
+      <p><b>Watched by:</b> alarm <code>libralink-healthcheck-failed</code> (also fires if the function stops running).</p>
+    </div>
+  </div>
+  <p>Also running unattended (not counted as one of the two): the request logger every minute, and — after the incident — log rotation every 15 minutes.</p>
+
+  <h3>Proof they ran on their own</h3>
+  <div class="table-wrap"><table>
+    <tr><th>Automation</th><th>Unattended run 1</th><th>Unattended run 2</th><th>Run 3+</th></tr>
+    <tr><td>Hourly backup</td><td><span class="fill">FILL: timestamp from /libralink/automation</span></td><td><span class="fill">FILL</span></td><td><span class="fill">FILL: e.g. "48 of 48 succeeded, 10–12 Nov"</span></td></tr>
+    <tr><td>Health check</td><td><span class="fill">FILL: timestamp with "trigger": "schedule"</span></td><td><span class="fill">FILL</span></td><td><span class="fill">FILL</span></td></tr>
+  </table></div>
+  <figure class="ev"><img src="evidence/E-14-automation-runs.png" alt="Log lines of automation runs with timestamps">
+    <div class="ev-missing">📷 Add <code>evidence/E-14-automation-runs.png</code>: CloudWatch Logs showing several <code>"job":"backup","result":"ok"</code> lines with timestamps, and several health-check lines with <code>"trigger":"schedule"</code> (or the E-14 section of <code>bash ops/aws/12-evidence.sh</code>).</div>
+    <figcaption><b>E-14</b> Timestamped log lines from runs nobody started by hand.</figcaption></figure>
+
+  <h3>How to deploy them</h3>
+  <p>Both are in the repository with the rest of the code. The backup is installed by the server's first-boot script (<code>ops/bootstrap-ec2.sh</code>); the health check by running <code>bash ops/aws/10-healthcheck.sh</code> in CloudShell. Full steps: <code>README.md</code> › "Deploying the automations".</p>
+
+  <h2 id="incident">2. The incident: the disk filled up (WS-F)</h2>
+
+  <h3>Timeline</h3>
+  <div class="table-wrap"><table>
+    <tr><th>When (PHT)</th><th>What happened</th></tr>
+    <tr><td><span class="fill">FILL</span></td><td><b>Fault starts.</b> We ran <code>ops/fault/fill-disk.sh</code>, which writes one huge file into <code>/var/log/libralink/</code>, the log folder with no rotation — the same thing a runaway debug log would do.</td></tr>
+    <tr><td><span class="fill">FILL</span></td><td>Users' new questions fail: <span class="fill">FILL: what you saw, e.g. "an error appeared instead of an answer"</span>.</td></tr>
+    <tr><td><span class="fill">FILL</span></td><td><b>Noticed:</b> "ALARM: libralink-disk-high" e-mail arrived (<a href="operations.html#monitoring">E-08</a>).</td></tr>
+    <tr><td><span class="fill">FILL</span></td><td>Investigation started with Session Manager (commands below).</td></tr>
+    <tr><td><span class="fill">FILL</span></td><td><b>Fixed:</b> file removed, app restarted, answers working again.</td></tr>
+    <tr><td><span class="fill">FILL</span></td><td><b>Prevented:</b> log rotation and journal cap installed and verified.</td></tr>
+  </table></div>
+  <p><b>Time to detect</b> (fault start → alarm): <span class="fill">FILL</span> minutes. <b>Time to fix</b> (alarm → working again): <span class="fill">FILL</span> minutes. Times come from <code>/var/log/libralink/incident-timeline.txt</code> and the alarm history.</p>
+
+  <h3>Investigation</h3>
+  <figure class="ev"><img src="evidence/E-15-investigation.png" alt="df, du and logs during the incident">
+    <div class="ev-missing">📷 Add <code>evidence/E-15-investigation.png</code>: Session Manager terminal showing <code>df -h /</code> at 100%, <code>sudo du -ah /var/log | sort -rh | head</code> with debug-trace.log at the top, and <code>docker logs chat-mongodb --tail 20</code> showing the "No space left on device" error (if it appears).</div>
+    <figcaption><b>E-15</b> What the commands showed during the incident.</figcaption></figure>
+  <pre>df -h /                                  # root disk 100% used
+sudo du -ah /var/log | sort -rh | head   # the biggest file: /var/log/libralink/debug-trace.log
+docker logs chat-mongodb --tail 20       # database errors while the disk is full
+docker logs LibreChat --tail 20          # app errors when saving messages
+ls /etc/logrotate.d/                     # no rule for /var/log/libralink</pre>
+
+  <h3>Root cause</h3>
+  <p><span class="fill">FILL / confirm after the test:</span> The disk filled because a log file in <code>/var/log/libralink/</code> had <b>no size limit and no rotation</b>, so it grew until the 20 GB disk was full; with no free space MongoDB could not write, so saving new messages failed and users got errors instead of answers. Restarting would not have helped — the full disk would still be full. (We created the oversized file ourselves to simulate a runaway log, as the brief allows.)</p>
+
+  <h3>The change that stops it happening again</h3>
+  <ul>
+    <li><b>Log rotation</b> (<code>ops/fault/logrotate-libralink</code>): any log in <code>/var/log/libralink</code> over 50 MB is rotated and compressed; only 5 old copies are kept. A systemd timer checks every 15 minutes.</li>
+    <li><b>Journal cap</b>: the system journal may use at most 200 MB.</li>
+    <li><b>Earlier warning</b>: the disk alarm checks every minute at 85%, so we hear about it well before 100%.</li>
+  </ul>
+  <p><b>Evidence the change worked:</b> <code>ops/fault/verify-fix.sh</code> wrote a 120 MB log on purpose; the rotation cut it back and compressed it (<span class="fill">FILL: size before → after</span>), and the disk alarm stayed OK.</p>
+  <figure class="ev"><img src="evidence/E-15b-prevention.png" alt="verify-fix output showing rotation">
+    <div class="ev-missing">📷 Add <code>evidence/E-15b-prevention.png</code>: output of <code>sudo /opt/libralink/ops/fault/verify-fix.sh</code> (sizes before and after, and the timer listing), plus the disk graph on the dashboard showing the spike and the return to normal.</div>
+    <figcaption><b>E-15b</b> The prevention measure tested.</figcaption></figure>
+
+  <h2 id="runbook">3. Runbook: disk full on libralink-server</h2>
+  <pre>RUNBOOK: Disk full on libralink-server
+Owner: LibraLink team    Last tested: <span class="fill">FILL date</span>    Takes: ~10 minutes    Ask: <span class="fill">FILL name</span>
+
+1. WHAT THIS IS FOR
+   Getting LibraLink Desk working again when the server's root disk is (nearly) full.
+
+2. HOW YOU KNOW YOU NEED IT
+   - Alarm e-mail "ALARM: libralink-disk-high" (disk above 85%), and maybe
+     "libralink-answers-failed-rate" or "libralink-nginx-5xx".
+   - Users say the assistant shows an error instead of answering.
+   Command that shows the problem (EC2 > libralink-server > Connect > Session Manager):
+     df -h /
+
+3. WHAT IT AFFECTS
+   Everyone: new questions and logins cannot be saved. Old chats may not load.
+
+4. HOW TO DO IT
+   Step 1: sudo du -ah /var/log /opt/libralink/app/data 2>/dev/null | sort -rh | head -10
+           -> you should see the biggest files at the top
+   Step 2: If it is a log file, empty or delete it:
+             sudo truncate -s 0 /var/log/libralink/&lt;file&gt;.log
+           If it is Docker data:   sudo docker system prune -f   (removes unused images only)
+           -> df -h / now shows free space
+   Step 3: sudo lsof +L1   (deleted files still held open; restart that process if any)
+   Step 4: sudo systemctl restart libralink
+           -> after ~1 minute:  curl -s localhost/health  prints OK
+   Step 5: Make sure rotation is in place:
+             systemctl list-timers logrotate-libralink.timer
+           If missing: sudo /opt/libralink/ops/fault/apply-fix.sh
+
+5. HOW TO CHECK IT WORKED
+   - [ ] df -h / is below 85%
+   - [ ] ask the system-card test question "How many books can an undergraduate borrow?" -> "5 books"
+   - [ ] no new alarms for 10 minutes (the disk alarm e-mails "OK")
+
+6. HOW TO UNDO IT
+   Deleting a log cannot be undone, so copy it first if it matters:
+     sudo cp &lt;file&gt; /tmp/   (only if there is space)  or upload it to S3.
+   docker system prune only removes images that can be downloaded again.
+
+7. GOTCHAS
+   - Restarting alone does not help: the disk is still full.
+   - A deleted file that a process still holds open keeps using space (step 3).
+   - At 100% disk, Session Manager can be slow to connect; wait and retry.
+   - <span class="fill">FILL: anything that wasted your time during the real test</span>
+
+8. CHANGE HISTORY
+   <span class="fill">FILL date</span> - written after the disk-full incident
+   <span class="fill">FILL date</span> - tested end-to-end during the incident</pre>
+</main>
+<script src="assets/site.js"></script>
+</body>
+</html>

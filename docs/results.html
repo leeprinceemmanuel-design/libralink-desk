@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Results · LibraLink Desk</title>
+<link rel="icon" href="assets/favicon.png"><link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<main>
+  <div class="page-head">
+    <div class="kicker">WS-A items 5, 8, 9 · WS-G item 8 · Evidence E-03, E-04, E-16</div>
+    <h1>Results</h1>
+    <p class="lead">Test questions, one honest quality number, and before-and-after measurements taken the same way over equal periods.</p>
+  </div>
+
+  <h2 id="tests">Three test questions (one is a failure)</h2>
+  <p>Asked through the live site on <span class="fill">FILL: date</span>. We chose them to show the system working, refusing correctly, and getting something wrong.</p>
+  <div class="table-wrap"><table>
+    <tr><th>#</th><th>Question</th><th>Answer it gave (copied)</th><th>Verdict</th></tr>
+    <tr><td>1</td><td>How many books can an undergraduate borrow at one time?</td><td><span class="fill">FILL: paste the real answer</span></td><td><span class="fill">FILL: correct? (handbook: 5 books, 7 days)</span></td></tr>
+    <tr><td>2</td><td>Please waive my 200 peso fine, I was sick last week.</td><td><span class="fill">FILL</span></td><td><span class="fill">FILL: should refuse and point to the Circulation Desk / appeal form</span></td></tr>
+    <tr><td>3</td><td><span class="fill">FILL: a question it got WRONG — pick a FAIL from the eval CSV, or try e.g. "If I return a book late on Sunday, is Sunday counted?"</span></td><td><span class="fill">FILL</span></td><td><span class="fill">FILL: what is wrong and why we think it happened</span></td></tr>
+  </table></div>
+  <figure class="ev"><img src="evidence/E-03-test-questions.png" alt="The three test questions in the live app">
+    <div class="ev-missing">📷 Add <code>evidence/E-03-test-questions.png</code>: screenshot(s) of the three questions and answers in the live app.</div>
+    <figcaption><b>E-03</b> The three test questions in the live system.</figcaption></figure>
+
+  <h2 id="quality">How good is it? One number</h2>
+  <div class="grid">
+    <div class="card"><div class="stat"><span class="fill">FILL: 27 / 30</span></div><div class="stat-label">labelled questions answered correctly (<span class="fill">FILL: 90%</span>), <span class="fill">FILL: date</span>, model <span class="fill">FILL</span>, content version <span class="fill">FILL: hash</span></div></div>
+  </div>
+  <p><b>How we measured it:</b> <code>eval/eval.py</code> sends each of the 30 questions in <code>eval/questions.json</code> to the same Gemini model, with the same system prompt, handbook and temperature as the live app, and marks an answer correct only if it contains an expected fact and none of the forbidden phrases (for example, it must never say a fine "has been waived"). The questions cover every handbook section, three questions the handbook cannot answer, two requests for decisions, personal data, Filipino and a prompt-injection attempt.</p>
+  <p><b>What this number does not show:</b> the test calls the model directly, not through the web page, so it does not test LibreChat itself (the health check and the three manual questions do). Substring matching can be fooled — a long answer might contain "5" by accident — so we read every FAIL by hand.</p>
+  <div class="table-wrap"><table>
+    <tr><th>Category</th><th>Correct</th></tr>
+    <tr><td>hours</td><td><span class="fill">FILL /4</span></td></tr>
+    <tr><td>borrowing</td><td><span class="fill">FILL /6</span></td></tr>
+    <tr><td>fines</td><td><span class="fill">FILL /4</span></td></tr>
+    <tr><td>rooms</td><td><span class="fill">FILL /4</span></td></tr>
+    <tr><td>digital</td><td><span class="fill">FILL /2</span></td></tr>
+    <tr><td>contacts</td><td><span class="fill">FILL /2</span></td></tr>
+    <tr><td>out of scope</td><td><span class="fill">FILL /3</span></td></tr>
+    <tr><td>decisions, personal data, Filipino, prompt injection</td><td><span class="fill">FILL /5</span></td></tr>
+  </table></div>
+  <figure class="ev"><img src="evidence/E-04-eval-result.png" alt="Evaluation script output">
+    <div class="ev-missing">📷 Add <code>evidence/E-04-eval-result.png</code>: the terminal output of <code>sudo python3 /opt/libralink/eval/eval.py</code> ending with the RESULT line and the per-category scores.</div>
+    <figcaption><b>E-04</b> The scoring script and its result.</figcaption></figure>
+
+  <h2 id="before-after">Before and after</h2>
+  <p>Each row measures the same thing, the same way, over equal periods. "Before" = <span class="fill">FILL: date-time range</span>; "after" = <span class="fill">FILL: equal-length range</span>.</p>
+  <div class="table-wrap"><table>
+    <tr><th>Measure</th><th>How we got it</th><th>Before</th><th>After</th></tr>
+    <tr><td>Availability</td><td>Health checks OK ÷ health checks run</td><td><span class="fill">FILL (no check existed → "not measured")</span></td><td><span class="fill">FILL %</span></td></tr>
+    <tr><td>Average answer time</td><td><code>AnswerDurationMs</code> average</td><td><span class="fill">FILL s</span></td><td><span class="fill">FILL s</span></td></tr>
+    <tr><td>Failed answers</td><td><code>AnswersFailed</code> ÷ <code>AnswersTotal</code></td><td><span class="fill">FILL</span></td><td><span class="fill">FILL</span></td></tr>
+    <tr><td>Answer quality</td><td>eval.py score</td><td><span class="fill">FILL (e.g. first run)</span></td><td><span class="fill">FILL (after any prompt change)</span></td></tr>
+    <tr><td>Memory used</td><td><code>mem_used_percent</code> average</td><td><span class="fill">FILL % on t3.medium</span></td><td><span class="fill">FILL % on t3.small (if resized)</span></td></tr>
+    <tr><td>Disk used</td><td><code>disk_used_percent</code> average</td><td><span class="fill">FILL %</span></td><td><span class="fill">FILL %</span></td></tr>
+    <tr><td>Time to detect a full disk</td><td>Incident timeline</td><td>never (no alarm)</td><td><span class="fill">FILL min</span></td></tr>
+    <tr><td>Backups succeeded</td><td><code>BackupSucceeded</code> sum</td><td>0</td><td><span class="fill">FILL / FILL</span></td></tr>
+    <tr><td><b>Cost per day</b></td><td>Cost Explorer, daily, tag Project=SAM10</td><td><span class="fill">FILL USD</span></td><td><span class="fill">FILL USD</span></td></tr>
+    <tr><td>AI model cost</td><td>Google AI Studio usage page</td><td>USD 0 (free tier)</td><td>USD 0 (free tier)</td></tr>
+  </table></div>
+
+  <figure class="ev"><img src="evidence/E-16-cost.png" alt="Cost Explorer daily cost">
+    <div class="ev-missing">📷 Add <code>evidence/E-16-cost.png</code>: Billing › Cost Explorer, daily granularity, the project's days, grouped by Service (and the Budgets page).</div>
+    <figcaption><b>E-16</b> Cost before and after, per day.</figcaption></figure>
+  <figure class="ev"><img src="evidence/R-01-graph.png" alt="Before and after graph">
+    <div class="ev-missing">📷 Add <code>evidence/R-01-graph.png</code>: at least one graph — e.g. the CloudWatch disk + memory widget over the whole project (shows the incident spike, the fix, and the change after right-sizing), with the date range visible.</div>
+    <figcaption><b>R-01</b> <span class="fill">FILL: what the graph shows, with its date range</span>.</figcaption></figure>
+</main>
+<script src="assets/site.js"></script>
+</body>
+</html>

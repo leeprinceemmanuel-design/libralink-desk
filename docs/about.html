@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Next steps, credits and declaration · LibraLink Desk</title>
+<link rel="icon" href="assets/favicon.png"><link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<main>
+  <div class="page-head">
+    <div class="kicker">WS-G item 9 · Appendix H</div>
+    <h1>What we would do next, credits, and declaration</h1>
+  </div>
+
+  <h2>What we would do next (in priority order)</h2>
+  <ol>
+    <li><b>Self-healing server.</b> Put the instance in an Auto Scaling group of one, built from a launch template that runs our bootstrap script, and keep MongoDB's data on its own EBS volume with daily snapshots. A dead server would be replaced automatically. (Our top Well-Architected gap.)</li>
+    <li><b>Deploy from the repository automatically.</b> A GitHub Actions workflow that, on a push to <code>main</code>, runs Session Manager's <code>send-command</code> to pull the code and restart the app — no more manual updates, and every change is recorded.</li>
+    <li><b>Nightly answer-quality check.</b> Run <code>eval.py</code> on 10 of the questions every night and publish the pass rate as a metric with an alarm, so a model change or a broken handbook shows up as a falling score.</li>
+    <li><b>Close the last plain-HTTP hop.</b> Have CloudFront add a secret header that nginx checks, or move to an HTTPS origin, so traffic between CloudFront and the server is protected too.</li>
+    <li><b>Switch the server off when nobody uses it.</b> Stop the instance overnight with a scheduled job (and start it in the morning) to cut compute cost by about a third.</li>
+  </ol>
+
+  <h2>Credits and licences</h2>
+  <ul>
+    <li><b>LibreChat</b> — <a href="https://github.com/danny-avila/LibreChat">github.com/danny-avila/LibreChat</a>, by Danny Avila and contributors, <a href="https://github.com/danny-avila/LibreChat/blob/main/LICENSE">MIT licence</a>. We use the unmodified Docker image and change it through configuration, an nginx layer and our own content. The licence and copyright notice stay inside the image, and LibreChat is credited in the app's footer.</li>
+    <li><b>Google Gemini API</b> — model <span class="fill">FILL</span>, used on the free tier under the <a href="https://ai.google.dev/gemini-api/terms">Gemini API Additional Terms of Service</a>.</li>
+    <li><b>MongoDB</b> (Server Side Public License) and <b>nginx</b> (2-clause BSD) — official Docker images, unmodified.</li>
+    <li><b>Nunito Sans</b> font — Google Fonts, SIL Open Font License.</li>
+    <li><b>AWS documentation</b> — Well-Architected Framework, CloudWatch, Systems Manager, CloudFront and IAM user guides.</li>
+    <li>Logo, handbook content, test questions, scripts and this website: our own work for SAM10 (with AI assistance, declared below).</li>
+  </ul>
+
+  <h2 id="declaration">Submission declaration</h2>
+  <div class="card">
+    <p>We confirm that the work submitted for SAM10 — Systems Administration and Maintenance, Final Project — is our own, except where clearly identified as borrowed, based on an existing open project, or as AI-assisted. We confirm that:</p>
+    <ul>
+      <li>the base system we built on is identified and credited, and we have complied with its licence;</li>
+      <li>the system described on our website and in our repository exists and can be demonstrated;</li>
+      <li>all data and content used in the system is invented, and contains no real patient, student or staff information;</li>
+      <li>our AI system does not make consequential decisions about identifiable people;</li>
+      <li>all evidence submitted is authentic and has not been altered to misrepresent results;</li>
+      <li>no AWS credentials, API keys or passwords are included in this submission, including in the history of our repository; and</li>
+      <li>we have read and accept the academic integrity and ethics requirements of this course.</li>
+    </ul>
+    <p><b>Use of AI tools.</b> We used Claude (Anthropic) to help write the deployment, monitoring, backup and automation scripts, to draft the handbook content and the text of this website, and to explain AWS concepts while we worked. We checked its output by running every script in our own AWS account and recording the real results shown on this site, comparing its explanations with the AWS documentation, and editing the text so it describes what we actually did.</p>
+    <div class="table-wrap"><table>
+      <tr><th>Student name</th><th>Student ID</th><th>Signature</th><th>Date</th></tr>
+      <tr><td>Prince Emmanuel C. Lee</td><td><span class="fill">FILL</span></td><td><span class="fill">FILL (typed name or signature image)</span></td><td><span class="fill">FILL</span></td></tr>
+      <tr><td><span class="fill">FILL: partner's name</span></td><td><span class="fill">FILL</span></td><td><span class="fill">FILL</span></td><td><span class="fill">FILL</span></td></tr>
+    </table></div>
+  </div>
+
+  <h2>Shut-down plan</h2>
+  <p>After grades are released we run <code>ops/aws/99-teardown.sh</code>, delete the IAM users and the Gemini API key, confirm in Cost Explorer that charges have stopped, and tell our instructor (brief section 6.2).</p>
+</main>
+<script src="assets/site.js"></script>
+</body>
+</html>

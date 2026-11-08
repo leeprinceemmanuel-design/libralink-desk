@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Our system and system card · LibraLink Desk</title>
+<link rel="icon" href="assets/favicon.png"><link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<main>
+  <div class="page-head">
+    <div class="kicker">WS-A items 1, 2, 7 · Evidence E-01, E-02, E-05</div>
+    <h1>Our system, and its system card</h1>
+    <p class="lead">What we started from, what we changed so it became our own, and an honest card describing what it does, what it cannot do, and who should not use it.</p>
+  </div>
+
+  <h2>The reskin: before and after</h2>
+  <div class="pair">
+    <figure class="ev"><img src="evidence/E-05-original-librechat.png" alt="Stock LibreChat interface">
+      <div class="ev-missing">📷 Add <code>evidence/E-05-original-librechat.png</code>: stock LibreChat running locally BEFORE the reskin (default logo, name, green buttons), ideally the login page or an empty chat.</div>
+      <figcaption><b>E-05</b> The original LibreChat as it comes, running on our laptop (<span class="fill">FILL: date</span>).</figcaption></figure>
+    <figure class="ev"><img src="evidence/E-01-libralink-desk.png" alt="LibraLink Desk interface answering a library question">
+      <div class="ev-missing">📷 Add <code>evidence/E-01-libralink-desk.png</code>: LibraLink Desk at the HTTPS address, showing the logo, colours and a real question + answer (e.g. "How many books can an undergraduate borrow?").</div>
+      <figcaption><b>E-01</b> LibraLink Desk in AWS, answering a borrowing question with its source section.</figcaption></figure>
+  </div>
+  <p><b>E-02 — address:</b> <span class="fill">FILL: https://xxxx.cloudfront.net</span> (accounts are created by us; ask us for a demo login).</p>
+
+  <h3>The four required changes (brief section 1.1)</h3>
+  <div class="table-wrap"><table>
+    <tr><th>Requirement</th><th>What we did</th><th>Where it is</th></tr>
+    <tr><td>1. Identity</td><td>New name "LibraLink Desk", our own logo (an open book with a chain link for a spine), teal-and-amber colour scheme, Nunito Sans font, new welcome text, footer, terms pop-up and browser icons. Any leftover "LibreChat" wording on screen is replaced.</td><td><code>app/branding/</code>, <code>app/librechat.env</code>, <code>app/nginx/nginx.conf</code></td></tr>
+    <tr><td>2. Data</td><td>A six-part library handbook we wrote ourselves (~1,700 words): hours, borrowing, fines, rooms and equipment, digital resources, contacts. Plus our 30 labelled test questions.</td><td><code>content/*.md</code> (stored in S3), <code>eval/questions.json</code></td></tr>
+    <tr><td>3. Domain language</td><td>Library terms throughout: circulation, holds, Red Tag books, renewals, clearance, interlibrary loan. Our rules make the assistant cite handbook sections, refuse account look-ups and decisions, warn about personal data, and reply in Filipino/Taglish when asked in Filipino.</td><td><code>app/system-prompt.txt</code>, <code>app/librechat.yaml.tmpl</code></td></tr>
+    <tr><td>4. AWS integration beyond hosting</td><td>(a) The handbook is read from <b>S3</b> each time the app starts. (b) All settings and secrets come from <b>Parameter Store</b>. (c) Alerts go out through <b>SNS</b>. (d) Each answer becomes custom <b>CloudWatch</b> metrics.</td><td><code>ops/start.sh</code>, <code>ops/exporter.py</code></td></tr>
+  </table></div>
+
+  <h3>What we turned off from the original</h3>
+  <p>LibreChat can talk to many AI providers and has agents, code running, web search, file search, presets, prompt libraries and public sign-up. A library help desk needs none of that, and each extra feature is something else to secure and pay for, so we switched them all off. Users see one assistant only — LibraLink Desk — and cannot change its model or rules.</p>
+
+  <h2 id="card">System card: LibraLink Desk</h2>
+
+  <h3>1. What it does</h3>
+  <p>LibraLink Desk is a chat assistant for library users. It answers general questions about the Luntian Ridge University Library (hours, borrowing rules, fines, rooms, equipment, e-resources, which desk to contact) using only the handbook we wrote, and points people to library staff for anything personal or anything that needs a decision.</p>
+
+  <h3>2. Who uses it, and who must not</h3>
+  <ul>
+    <li><b>Intended users:</b> students, faculty and staff of the (fictional) university who want quick, general library information.</li>
+    <li><b>Explicitly NOT for:</b> checking someone's loans, fines or clearance; approving or waiving fines, appeals or exceptions; any decision about an identifiable person; legal, medical or academic advice; and any real library — the handbook is invented.</li>
+  </ul>
+
+  <h3>3. Base system</h3>
+  <ul>
+    <li><b>Name and version:</b> LibreChat <span class="fill">FILL: version, e.g. v0.8.x — from the image tag or Settings › About</span>, Docker image <code>ghcr.io/danny-avila/librechat</code></li>
+    <li><b>Source:</b> <a href="https://github.com/danny-avila/LibreChat">github.com/danny-avila/LibreChat</a> (also listed in the brief as github.com/LibreChat-AI/LibreChat)</li>
+    <li><b>Author:</b> Danny Avila and the LibreChat contributors</li>
+    <li><b>Licence:</b> <a href="https://github.com/danny-avila/LibreChat/blob/main/LICENSE">MIT</a> — allows changing and renaming the software, as long as the copyright notice and licence are kept with it. We keep them in the image and credit LibreChat in the app footer, the README and this site.</li>
+    <li><b>What it did originally:</b> a general ChatGPT-style chat interface for many AI providers, with user accounts, conversation history, agents, presets and file uploads.</li>
+  </ul>
+
+  <h3>4. What we changed (the reskin)</h3>
+  <div class="table-wrap"><table>
+    <tr><th>Part</th><th>Original</th><th>Ours</th><th>Why we changed it</th></tr>
+    <tr><td>Name / branding</td><td>"LibreChat", LibreChat logo, green accent</td><td>"LibraLink Desk", our own book-and-link logo, teal and amber, Nunito Sans</td><td>A stranger should not recognise the original; the library needs its own identity.</td></tr>
+    <tr><td>Data / content</td><td>None — general chat</td><td>Our 6-file library handbook in S3, added to every conversation as the assistant's only source</td><td>Answers must come from the library's rules, not the model's guesses.</td></tr>
+    <tr><td>Wording / prompts</td><td>No system prompt; generic welcome</td><td>8 rules: handbook only, fixed "not found" sentence, cite the source, no decisions, no personal data, Filipino replies, resist prompt injection</td><td>Safe, predictable answers we can measure.</td></tr>
+    <tr><td>Interface</td><td>Model picker, presets, agents, side panel, public sign-up</td><td>One enforced assistant; extras off; terms pop-up; accounts created by us</td><td>Simpler for users, smaller attack surface, protects the free model quota.</td></tr>
+    <tr><td>AWS services</td><td>None (runs anywhere)</td><td>EC2, CloudFront, S3, Parameter Store, CloudWatch, SNS, Lambda, EventBridge, IAM, CloudTrail, GuardDuty, Budgets</td><td>Hosting plus real operations: security, monitoring, backups, automation.</td></tr>
+  </table></div>
+
+  <h3>5. Data</h3>
+  <ul>
+    <li><b>Where it came from:</b> written by us for this project (<code>content/</code>), shared under the same terms as our repository. The university, library, rooms, prices and contacts are all invented; e-mail addresses use the reserved <code>.example</code> domain.</li>
+    <li><b>Size and format:</b> 6 Markdown files, about 1,700 words (~11,000 characters once inside the prompt).</li>
+    <li><b>Anything personal in it:</b> no — all invented.</li>
+    <li><b>Anything sent to a third-party AI service:</b> yes — every question, the conversation so far, and the full handbook go to Google's Gemini API. The handbook is invented, users are warned in a pop-up not to type personal data, questions that look like they contain personal data are redacted in our logs and raise an alarm, and all our test questions are invented. On Google's free tier, Google may use what is sent to improve its products, which is one more reason the data must stay invented.</li>
+  </ul>
+
+  <h3>6. How good it is</h3>
+  <ul>
+    <li><b>The one number:</b> <span class="fill">FILL: e.g. 27 of 30 test questions correct (90%)</span> on <span class="fill">FILL: date</span>.</li>
+    <li><b>How we measured it:</b> <code>eval/eval.py</code> sends each of our 30 labelled questions to the same model, with the same prompt and handbook the app uses, and checks the answer for the expected facts (and for things it must not say). See <a href="results.html#quality">Results</a>.</li>
+    <li><b>What the cases cover:</b> all six handbook sections (22), questions the handbook cannot answer (3), requests for decisions (2), personal data (1), Filipino (1) and a prompt-injection attempt (1).</li>
+    <li><b>An example it gets wrong:</b> <span class="fill">FILL: copy a real FAIL line from the eval CSV, e.g. the question, what it said, and why that is wrong.</span></li>
+  </ul>
+
+  <h3>7. How it is served</h3>
+  <ul>
+    <li><b>Where it runs:</b> one EC2 instance (<span class="fill">FILL: type</span>, Amazon Linux 2023) in ap-southeast-1 (Singapore), behind CloudFront.</li>
+    <li><b>What calls it:</b> users at <span class="fill">FILL: https://xxxx.cloudfront.net</span>; LibreChat's chat API under <code>/api/</code>; health check at <code>/health</code>.</li>
+    <li><b>The model behind it:</b> Google <span class="fill">FILL: model name, e.g. gemini-2.5-flash</span> via the Gemini API, free tier, temperature 0.2.</li>
+    <li><b>If the model or service is unavailable:</b> the user sees an error message in the chat instead of an answer; the answer is logged as failed, and the <code>libralink-answers-failed-rate</code> alarm e-mails us. If the free-tier limit is hit, Gemini returns HTTP 429 (too many requests) until the limit resets.</li>
+  </ul>
+
+  <h3>8. Limitations and risks</h3>
+  <ul>
+    <li><b>What it cannot do:</b> see anyone's account; know anything not in the handbook; know about changes made after the handbook was last uploaded; guarantee the model never makes something up.</li>
+    <li><b>What could go wrong with the data:</b> if the handbook fails to load from S3, the app refuses to start (it will not run without its content). If the handbook is out of date, the assistant will confidently repeat old rules.</li>
+    <li><b>How it could be misused:</b> people could try to make it ignore its rules (prompt injection), use it as a free general chatbot, or paste personal data. Rules in the prompt, per-user message limits and the personal-data alarm reduce — but do not remove — these risks.</li>
+    <li><b>What a user must always check:</b> anything involving money, deadlines or their own record (fines, due dates, clearance) with Circulation Desk staff.</li>
+  </ul>
+
+  <h3>9. Operational summary</h3>
+  <ul>
+    <li><b>Where the code lives:</b> <span class="fill">FILL: GitHub repo URL</span></li>
+    <li><b>How often it is backed up:</b> database every hour to S3 (kept 7 days); handbook versioned in S3; settings listed hourly.</li>
+    <li><b>How we know it is healthy:</b> the 12 alarms on the <a href="operations.html#monitoring">Monitoring</a> section, especially failed-answer rate, health check and disk.</li>
+    <li><b>Who to contact:</b> the two team members, via the SAM10 class channel.</li>
+  </ul>
+
+  <h2 id="terms">Terms of use</h2>
+  <p>LibraLink Desk is a student project for SAM10. It gives general information about an invented library. Answers may be wrong. Do not rely on it for anything that matters, and always confirm with library staff. Do not try to make it break its rules or use it for anything other than library questions.</p>
+
+  <h2 id="privacy">Privacy notice</h2>
+  <p>Do not type personal information. Your questions and the assistant's answers are stored in our database (backed up for 7 days) and sent to Google's Gemini API to produce answers. Our monitoring log keeps the question text, timing and result for 14 days; questions that look like they contain personal data are replaced with "[redacted]" in that log. Nothing is used for any decision about you. All accounts and data are deleted when the course ends.</p>
+</main>
+<script src="assets/site.js"></script>
+</body>
+</html>
