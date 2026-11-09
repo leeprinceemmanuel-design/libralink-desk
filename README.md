@@ -86,13 +86,13 @@ Who did what, day by day (evidence for the 15% individual mark). Keep this hones
 
 | Day / date | Prince Emmanuel C. Lee | John Micheal Agustin |
 |---|---|---|
-| Day 1 — FILL date | FILL | FILL |
+| Day 1 — 8–9 Nov 2026 | Read the brief; ran the original LibreChat locally (E-05); set up the GitHub repo and Pages site; created the AWS account, MFA and budget alert; tested the Free-plan limits and moved the project to Sydney; deployed the server, HTTPS (CloudFront) and lock-down; switched the AI model when Google retired the old one; set up monitoring, alarms, the health check and CloudTrail | Chose the project approach with Lee (Team logins); joined the AWS account through the Team page and set up his own MFA (E-12c); confirmed the alert e-mail subscription; reviewed the plan for Day 2 |
 | Day 2 — FILL date | FILL | FILL |
 | Day 3 — FILL date | FILL | FILL |
 
-Roles: FILL (e.g. AI and integration engineer — base system, reskin, AWS wiring) and FILL (e.g.
-reliability engineer — dashboard, alarms, backups, automation, incident). Shared: deployment,
-security, website, video.
+Roles: Prince Emmanuel C. Lee — deployment and AWS engineer (server, HTTPS, security, monitoring).
+John Micheal Agustin — reliability and testing (quality test, restore test, incident, evidence).
+Shared: website, video.
 
 ## AI assistance
 
