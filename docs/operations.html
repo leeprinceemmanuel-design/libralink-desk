@@ -52,6 +52,9 @@
     <figcaption><b>E-07</b> The 12 alarms.</figcaption></figure>
 
   <h3>Proof that an alert reached a real person</h3>
+  <figure class="ev"><img src="evidence/E-08a-sns-confirmed.png" alt="Both e-mail subscriptions confirmed">
+    <div class="ev-missing">📷 Add <code>evidence/E-08a-sns-confirmed.png</code>: the list of SNS subscriptions, both confirmed.</div>
+    <figcaption><b>E-08a</b> Both team members confirmed the alert e-mails (9 Nov 2026).</figcaption></figure>
   <figure class="ev"><img src="evidence/E-08-alert-email.png" alt="Alarm email in the inbox with date and time">
     <div class="ev-missing">📷 Add <code>evidence/E-08-alert-email.png</code>: the "ALARM: libralink-disk-high" e-mail (from the incident) open in your inbox, with the date and time visible. Blur your e-mail address if you like.</div>
     <figcaption><b>E-08</b> Alarm e-mail received <span class="fill">FILL: date, time</span> — and what we did about it: see the <a href="automation.html#incident">incident</a>.</figcaption></figure>
@@ -111,6 +114,15 @@
     <tr><td>Public sign-up</td><td>Anyone could register</td><td>Registration off; we create accounts</td></tr>
   </table></div>
 
+  <div class="pair">
+    <figure class="ev"><img src="evidence/E-02b-sg-locked.png" alt="Security group rules after lock-down">
+      <div class="ev-missing">📷 Add <code>evidence/E-02b-sg-locked.png</code>: output of 08-lockdown.sh or the Inbound rules showing only the CloudFront prefix list.</div>
+      <figcaption><b>E-02b</b> After lock-down: port 80 only from CloudFront's address list (compare with <a href="baseline.html">B-02</a>).</figcaption></figure>
+    <figure class="ev"><img src="evidence/E-02c-direct-blocked.png" alt="Direct server address times out">
+      <div class="ev-missing">📷 Add <code>evidence/E-02c-direct-blocked.png</code>: the browser timing out on the http://ec2-... address.</div>
+      <figcaption><b>E-02c</b> Going straight to the server now times out; only the HTTPS address works.</figcaption></figure>
+  </div>
+
   <div class="warn"><b>Why there are no IAM users.</b> Our account is on the AWS Free plan, which puts AWS's own rules (service control policies) above our account. We tested them on 9 Nov 2026: IAM roles were allowed, but giving an IAM user a console password and creating IAM groups were blocked ("explicit deny in a service control policy"). So instead of the brief's suggested IAM users and admin role, each of us signs in with our own AWS login and MFA, added through AWS's Team page. The goals stay the same: no shared logins, MFA for every person, no access keys. Turning on EBS encryption by default was blocked the same way, so our launch script encrypts the disk itself. Amazon GuardDuty (threat detection) is blocked too, so we rely on CloudTrail, our alarms and the locked-down network instead. The same rules also lock the account to one region, Sydney (ap-southeast-2) — see the <a href="infrastructure.html">AWS design</a> page.</div>
 
   <h3>Each control, and the risk it addresses</h3>
@@ -131,9 +143,14 @@
     <figure class="ev"><img src="evidence/E-12-team.png" alt="Team page with both members">
       <div class="ev-missing">📷 Add <code>evidence/E-12-team.png</code>: the console's Team page showing both members (crop out e-mail addresses if you like).</div>
       <figcaption><b>E-12</b> Both of us have our own login on the account.</figcaption></figure>
-    <figure class="ev"><img src="evidence/E-12b-owner-mfa.png" alt="MFA device registered on the owner login">
-      <div class="ev-missing">📷 Add <code>evidence/E-12b-owner-mfa.png</code>: the MFA devices box of your AWS login's Security page.</div>
-      <figcaption><b>E-12b</b> MFA registered on the account owner's login (<span class="fill">FILL: add John's too, as E-12c, if you can</span>).</figcaption></figure>
+    <div class="pair">
+    <figure class="ev"><img src="evidence/E-12b-lee-mfa.png" alt="MFA device on Prince Lee's login">
+      <div class="ev-missing">📷 Add <code>evidence/E-12b-lee-mfa.png</code>: the MFA devices box of Prince Lee's AWS login.</div>
+      <figcaption><b>E-12b</b> MFA on Prince Lee's login (account owner).</figcaption></figure>
+    <figure class="ev"><img src="evidence/E-12c-john-mfa.png" alt="MFA device on John Micheal Agustin's login">
+      <div class="ev-missing">📷 Add <code>evidence/E-12c-john-mfa.png</code>: the MFA devices box of John's AWS login.</div>
+      <figcaption><b>E-12c</b> MFA on John Micheal Agustin's login.</figcaption></figure>
+    </div>
     <figure class="ev"><img src="evidence/E-13-parameter-store.png" alt="Parameter Store list of names">
       <div class="ev-missing">📷 Add <code>evidence/E-13-parameter-store.png</code>: Systems Manager › Parameter Store list (names and types only — NEVER click "Show" on a SecureString value).</div>
       <figcaption><b>E-13</b> Settings and secrets in Parameter Store.</figcaption></figure>

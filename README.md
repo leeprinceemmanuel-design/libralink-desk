@@ -4,8 +4,8 @@ A library help-desk AI assistant for the (fictional) Luntian Ridge University Li
 **LibreChat reskinned, deployed to AWS, and operated properly** for the SAM10 Systems
 Administration and Maintenance final project.
 
-- **Live system:** FILL: https://xxxx.cloudfront.net
-- **Project website (all documentation, evidence and the video):** FILL: https://<user>.github.io/libralink-desk/
+- **Live system:** https://d2g0ygnhaomokh.cloudfront.net
+- **Project website (all documentation, evidence and the video):** https://leeprinceemmanuel-design.github.io/libralink-desk/
 - **Team:** Prince Emmanuel C. Lee, John Micheal Agustin
 
 ## Credits
@@ -35,13 +35,13 @@ All university, library and user data in this repository is invented.
 All AWS commands run in **CloudShell**, signed in with each person's own AWS login (with MFA), so no access keys exist.
 
 ```bash
-git clone https://github.com/FILL/libralink-desk.git && cd libralink-desk
+git clone https://github.com/leeprinceemmanuel-design/libralink-desk.git && cd libralink-desk
 ALERT_EMAILS="a@example.com,b@example.com" bash ops/aws/01-budget.sh
 bash ops/aws/02-iam.sh                                   # checks: no IAM passwords or keys
 bash ops/aws/03-s3.sh
 bash ops/aws/04-params.sh                                # asks for the Gemini key (hidden)
 ALERT_EMAILS="a@example.com,b@example.com" bash ops/aws/05-sns-logs.sh
-REPO_URL="https://github.com/FILL/libralink-desk.git" bash ops/aws/06-ec2.sh
+REPO_URL="https://github.com/leeprinceemmanuel-design/libralink-desk.git" bash ops/aws/06-ec2.sh
 bash ops/aws/07-cloudfront.sh
 bash ops/aws/08-lockdown.sh
 bash ops/aws/09-monitoring.sh

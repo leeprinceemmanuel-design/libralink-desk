@@ -17,12 +17,15 @@
   <div class="pair">
     <figure class="ev"><img src="evidence/E-05-original-librechat.png" alt="Stock LibreChat interface">
       <div class="ev-missing">📷 Add <code>evidence/E-05-original-librechat.png</code>: stock LibreChat running locally BEFORE the reskin (default logo, name, green buttons), ideally the login page or an empty chat.</div>
-      <figcaption><b>E-05</b> The original LibreChat as it comes, running on our laptop (<span class="fill">FILL: date</span>).</figcaption></figure>
+      <figcaption><b>E-05</b> The original LibreChat v0.8.7 as it comes, running on our laptop (8 Nov 2026).</figcaption></figure>
     <figure class="ev"><img src="evidence/E-01-libralink-desk.png" alt="LibraLink Desk interface answering a library question">
       <div class="ev-missing">📷 Add <code>evidence/E-01-libralink-desk.png</code>: LibraLink Desk at the HTTPS address, showing the logo, colours and a real question + answer (e.g. "How many books can an undergraduate borrow?").</div>
       <figcaption><b>E-01</b> LibraLink Desk in AWS, answering a borrowing question with its source section.</figcaption></figure>
   </div>
-  <p><b>E-02 — address:</b> <span class="fill">FILL: https://xxxx.cloudfront.net</span> (accounts are created by us; ask us for a demo login).</p>
+  <p><b>E-02 — address:</b> <a href="https://d2g0ygnhaomokh.cloudfront.net">https://d2g0ygnhaomokh.cloudfront.net</a> (accounts are created by us; ask us for the demo login).</p>
+  <figure class="ev"><img src="evidence/E-02-https.png" alt="LibraLink Desk over HTTPS">
+    <div class="ev-missing">📷 Add <code>evidence/E-02-https.png</code>: the login page at the cloudfront.net address with no "Not secure" warning.</div>
+    <figcaption><b>E-02</b> The live system over HTTPS through CloudFront.</figcaption></figure>
 
   <h3>The four required changes (brief section 1.1)</h3>
   <div class="table-wrap"><table>
@@ -49,7 +52,7 @@
 
   <h3>3. Base system</h3>
   <ul>
-    <li><b>Name and version:</b> LibreChat <span class="fill">FILL: version, e.g. v0.8.x — from the image tag or Settings › About</span>, Docker image <code>ghcr.io/danny-avila/librechat</code></li>
+    <li><b>Name and version:</b> LibreChat v0.8.7, Docker image <code>ghcr.io/danny-avila/librechat</code></li>
     <li><b>Source:</b> <a href="https://github.com/danny-avila/LibreChat">github.com/danny-avila/LibreChat</a> (also listed in the brief as github.com/LibreChat-AI/LibreChat)</li>
     <li><b>Author:</b> Danny Avila and the LibreChat contributors</li>
     <li><b>Licence:</b> <a href="https://github.com/danny-avila/LibreChat/blob/main/LICENSE">MIT</a> — allows changing and renaming the software, as long as the copyright notice and licence are kept with it. We keep them in the image and credit LibreChat in the app footer, the README and this site.</li>
@@ -84,8 +87,8 @@
 
   <h3>7. How it is served</h3>
   <ul>
-    <li><b>Where it runs:</b> one EC2 instance (<span class="fill">FILL: type</span>, Amazon Linux 2023) in ap-southeast-2 (Sydney), behind CloudFront.</li>
-    <li><b>What calls it:</b> users at <span class="fill">FILL: https://xxxx.cloudfront.net</span>; LibreChat's chat API under <code>/api/</code>; health check at <code>/health</code>.</li>
+    <li><b>Where it runs:</b> one EC2 instance (t3.small, Amazon Linux 2023) in ap-southeast-2 (Sydney), behind CloudFront.</li>
+    <li><b>What calls it:</b> users at <a href="https://d2g0ygnhaomokh.cloudfront.net">https://d2g0ygnhaomokh.cloudfront.net</a>; LibreChat's chat API under <code>/api/</code>; health check at <code>/health</code>.</li>
     <li><b>The model behind it:</b> Google gemini-3.5-flash-lite via the Gemini API, free tier, temperature 0.2.</li>
     <li><b>If the model or service is unavailable:</b> the user sees an error message in the chat instead of an answer; the answer is logged as failed, and the <code>libralink-answers-failed-rate</code> alarm e-mails us. If the free-tier limit is hit, Gemini returns HTTP 429 (too many requests) until the limit resets.</li>
   </ul>
@@ -100,7 +103,7 @@
 
   <h3>9. Operational summary</h3>
   <ul>
-    <li><b>Where the code lives:</b> <span class="fill">FILL: GitHub repo URL</span></li>
+    <li><b>Where the code lives:</b> <a href="https://github.com/leeprinceemmanuel-design/libralink-desk">github.com/leeprinceemmanuel-design/libralink-desk</a></li>
     <li><b>How often it is backed up:</b> database every hour to S3 (kept 7 days); handbook versioned in S3; settings listed hourly.</li>
     <li><b>How we know it is healthy:</b> the 12 alarms on the <a href="operations.html#monitoring">Monitoring</a> section, especially failed-answer rate, health check and disk.</li>
     <li><b>Who to contact:</b> the two team members, via the SAM10 class channel.</li>
