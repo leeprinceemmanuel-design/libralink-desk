@@ -8,8 +8,8 @@ Wants=network-online.target
 Type=oneshot
 RemainAfterExit=yes
 WorkingDirectory=/opt/libralink
-ExecStart=/opt/libralink/ops/start.sh
-ExecStop=/opt/libralink/ops/stop.sh
+ExecStart=/bin/bash /opt/libralink/ops/start.sh
+ExecStop=/bin/bash /opt/libralink/ops/stop.sh
 TimeoutStartSec=900
 
 [Install]

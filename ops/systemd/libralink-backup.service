@@ -3,6 +3,8 @@ Description=LibraLink backup (MongoDB dump + parameter list to S3)
 After=libralink.service
 
 [Service]
+# Run through bash so the job still works if a git pull drops the file's executable bit
+# (that happened on 9 Nov: the 22:05 backup failed with "Permission denied").
 Type=oneshot
-ExecStart=/opt/libralink/ops/backup.sh
+ExecStart=/bin/bash /opt/libralink/ops/backup.sh
 TimeoutStartSec=600
