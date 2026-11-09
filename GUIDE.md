@@ -54,30 +54,28 @@ Then stop it (its container names clash with ours): `docker compose down`, `cd .
 
 *(Optional: run OUR version locally too: `bash ops/local/up.sh`, open <http://localhost:8080>, create a user with `docker exec -it LibreChat npm run create-user`. Stop with `bash ops/local/down.sh`.)*
 
-### Step 4 — Make the AWS account safe (root user, once)
-1. Sign in as root. If root has no MFA: top-right name → **Security credentials** → **Assign MFA device**.
-2. Region selector (top right) → **Asia Pacific (Singapore) ap-southeast-1**. Always use this region.
-3. Open **CloudShell** and get the code:
+### Step 4 — Make the AWS account safe (account owner, once)
+Our account is on the AWS **Free plan**. It signs the owner in through an AWS-made role and
+**blocks IAM console users and groups**, so people are added through the **Team** page instead.
+1. Owner login MFA: menu (account name, top right) → **Profile** → **Manage profile** → **Security** →
+   **Register device** (authenticator app). 📷 **E-12b** → `E-12b-owner-mfa.png` (MFA box only).
+2. Make sure the console address says `region=ap-southeast-1` (Singapore).
+3. Open **CloudShell** (bottom-left) and get the code:
    ```bash
    git clone https://github.com/<your-user>/libralink-desk.git && cd libralink-desk
    ```
-4. Budget alert first (brief: day one). Use both your real e-mail addresses:
+4. Budget alert first (brief: day one):
    ```bash
-   ALERT_EMAILS="you@gmail.com,partner@gmail.com" BUDGET_USD=10 bash ops/aws/01-budget.sh
+   ALERT_EMAILS="you@...,partner@..." BUDGET_USD=10 bash ops/aws/01-budget.sh
    ```
-   You should see "Budget created." and `true` for EBS encryption.
-5. People and permissions:
-   ```bash
-   IAM_USERS="lee partner" bash ops/aws/02-iam.sh
-   ```
-   It prints a sign-in URL and a one-time password per user. Give your partner theirs privately, then type `clear`.
-6. **Each person:** open the sign-in URL → sign in → set a new password → top-right → **Security credentials** → **Assign MFA device** (authenticator app) → sign out → sign in again.
-7. **Each person:** top-right → **Switch role** → Account = your 12-digit account ID, Role = `SAM10-Admin` → Switch. From now on work like this. **Stop using root.**
+   "Budget created." The encryption-by-default line is blocked on the Free plan; that's expected.
+5. Check people and permissions: `bash ops/aws/02-iam.sh` (it removes test leftovers and shows no IAM passwords or keys).
+6. Menu → **Team** → invite your partner by e-mail. They accept, sign in with **their own** AWS login, and register **their own** MFA.
+   📷 **E-12** → `E-12-team.png` (Team page with both of you).
 
-### Step 5 — Build the AWS side (in CloudShell, as SAM10-Admin)
-CloudShell starts fresh for the role, so clone the repo again:
+### Step 5 — Build the AWS side (in CloudShell)
+If CloudShell was restarted, `cd libralink-desk && git pull` first.
 ```bash
-git clone https://github.com/<your-user>/libralink-desk.git && cd libralink-desk
 bash ops/aws/03-s3.sh
 SITE_URL="https://<your-user>.github.io/libralink-desk" bash ops/aws/04-params.sh
 ```
@@ -85,7 +83,7 @@ SITE_URL="https://<your-user>.github.io/libralink-desk" bash ops/aws/04-params.s
 - 📷 **E-13** → `E-13-parameter-store.png`: Systems Manager → Parameter Store list (names only, **never click Show**).
 
 ```bash
-ALERT_EMAILS="you@gmail.com,partner@gmail.com" bash ops/aws/05-sns-logs.sh
+ALERT_EMAILS="you@...,partner@..." bash ops/aws/05-sns-logs.sh
 ```
 **Both of you: open the "AWS Notification - Subscription Confirmation" e-mail and click Confirm.**
 
@@ -200,7 +198,7 @@ cat /var/log/libralink/incident-timeline.txt
 ```bash
 bash ops/aws/12-evidence.sh            # CloudShell
 ```
-- 📷 **E-12** → `E-12-iam-mfa.png` (IAM → Users, MFA column).
+- 📷 **E-12** → `E-12-team.png` if not taken yet (Team page, both members).
 - On your laptop: `bash ops/check-secrets.sh` → 📷 **E-13b** → `E-13b-secret-scan.png`.
 - GuardDuty console → Findings: write "none" or explain each on the Operations page.
 
@@ -246,7 +244,7 @@ Make the repository ZIP **with the .git folder** (zip the whole folder on your l
 Submit: website URL + repository ZIP (the video is embedded on the site). Both sign the declaration on the website's last page.
 
 ### After grading
-`bash ops/aws/99-teardown.sh`, delete the IAM users and the Gemini key, tell your instructor.
+`bash ops/aws/99-teardown.sh`, remove your partner from the Team page, delete the Gemini key, tell your instructor.
 
 ---
 

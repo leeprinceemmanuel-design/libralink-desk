@@ -54,5 +54,14 @@ for g in $LOG_GROUPS /aws/lambda/libralink-healthcheck; do aws logs delete-log-g
 aws cloudtrail delete-trail --name libralink-trail 2>/dev/null || true
 
 echo
-echo "Left on purpose: IAM users/roles (delete in the IAM console), the budget, GuardDuty (disable in its console)."
+say "Server and health-check roles"
+aws iam remove-role-from-instance-profile --instance-profile-name libralink-ec2-profile --role-name libralink-ec2-role 2>/dev/null || true
+aws iam delete-instance-profile --instance-profile-name libralink-ec2-profile 2>/dev/null || true
+aws iam detach-role-policy --role-name libralink-ec2-role --policy-arn arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore 2>/dev/null || true
+aws iam delete-role-policy --role-name libralink-ec2-role --policy-name libralink-least-privilege 2>/dev/null || true
+aws iam delete-role --role-name libralink-ec2-role 2>/dev/null || true
+aws iam detach-role-policy --role-name libralink-healthcheck-role --policy-arn arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole 2>/dev/null || true
+aws iam delete-role-policy --role-name libralink-healthcheck-role --policy-name put-libralink-metrics 2>/dev/null || true
+aws iam delete-role --role-name libralink-healthcheck-role 2>/dev/null || true
+echo "Left on purpose: the budget, GuardDuty (disable in its console), and your partner on the Team page."
 echo "Then tell your instructor everything is shut down (brief section 6.2)."

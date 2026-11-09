@@ -19,13 +19,16 @@ aws s3api list-objects-v2 --bucket "$BUCKET" --prefix backups/mongo/ \
 aws s3api get-bucket-versioning --bucket "$BUCKET"
 aws s3api get-bucket-lifecycle-configuration --bucket "$BUCKET" --query 'Rules[].{Id:ID,Prefix:Filter.Prefix,ExpireDays:Expiration.Days}' --output table
 
-say "E-12  IAM users and their MFA devices"
-for u in $(aws iam list-users --query 'Users[].UserName' --output text); do
-  mfa=$(aws iam list-mfa-devices --user-name "$u" --query 'length(MFADevices)')
+say "E-12  People: no IAM users with passwords, no access keys anywhere"
+users=$(aws iam list-users --query 'Users[].UserName' --output text)
+[[ -z "$users" ]] && echo "  no IAM users (people sign in with their own AWS logins + MFA via the Team page)"
+for u in $users; do
+  pw=$(aws iam get-login-profile --user-name "$u" >/dev/null 2>&1 && echo yes || echo no)
   keys=$(aws iam list-access-keys --user-name "$u" --query 'length(AccessKeyMetadata)')
-  printf '  %-20s MFA devices: %s   access keys: %s\n' "$u" "$mfa" "$keys"
+  printf '  %-20s console password: %-3s  access keys: %s\n' "$u" "$pw" "$keys"
 done
-aws iam get-account-summary --query 'SummaryMap.{RootMFA:AccountMFAEnabled,RootAccessKeys:AccountAccessKeysPresent}'
+echo "Roles we created (machines only):"
+aws iam list-roles --query 'Roles[?starts_with(RoleName,`libralink-`)].RoleName' --output text | tr '\t' '\n' | sed 's/^/  /'
 
 say "E-13  Parameter Store (names and types only)"
 aws ssm describe-parameters --parameter-filters "Key=Name,Option=BeginsWith,Values=$PARAM_PREFIX/" \

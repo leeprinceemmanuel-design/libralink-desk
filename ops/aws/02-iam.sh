@@ -1,50 +1,53 @@
 #!/usr/bin/env bash
-# DAY 1, STEP 2 - people and permissions (WS-D items 1 and 2).
-# Run ONCE from CloudShell while signed in as the account root user (root must already have MFA).
-#   IAM_USERS="lee partner" bash ops/aws/02-iam.sh
+# DAY 1, STEP 2 - people and permissions (WS-D items 1 and 2), FREE-PLAN VERSION.
+#   bash ops/aws/02-iam.sh
 #
-# Creates:
-#   group SAM10-Operators : ReadOnlyAccess + "manage my own password and MFA" + may switch into SAM10-Admin
-#   role  SAM10-Admin     : AdministratorAccess, can only be assumed by an operator WITH MFA, max 1 hour
-#   one IAM user per person, in that group, with a one-time password (must change at first sign-in)
-# No access keys are created. All CLI work is done in CloudShell after switching role.
+# Why this is different from a "normal" AWS account:
+#   Our account is on the AWS Free plan. AWS puts free-plan accounts under its own
+#   service control policies (rules set ABOVE our account). We tested them on 9 Nov 2026:
+#     - IAM roles, role policies, instance profiles .......... allowed
+#     - IAM users with a console password (create-login-profile) .. BLOCKED
+#     - IAM groups (attach-group-policy) ....................... BLOCKED
+#   So people cannot get classic IAM console users. Instead:
+#     - each person signs in with their OWN AWS login (AWS Builder ID), with their OWN MFA,
+#       and is added to the account through the console's "Team" page;
+#     - nobody shares a login; there are no IAM users with passwords and NO access keys;
+#     - machines (the EC2 server, the Lambda health check) get IAM ROLES with only the
+#       permissions they need (created by 06-ec2.sh and 10-healthcheck.sh).
+#
+# This script only (1) removes the leftovers of our first attempt and (2) checks that
+# no IAM user has a password or access key.
 source "$(dirname "$0")/config.sh"
-: "${IAM_USERS:?set IAM_USERS=\"lee partner\"}"
-P="$(dirname "$0")/policies"
 
-say "Role SAM10-Admin (MFA required to assume)"
-sed "s/__ACCOUNT_ID__/$ACCOUNT_ID/g" "$P/admin-role-trust.json" > /tmp/trust.json
-aws iam create-role --role-name SAM10-Admin --assume-role-policy-document file:///tmp/trust.json \
-  --max-session-duration 3600 --tags $TAGS_KV >/dev/null 2>&1 || echo "(role exists)"
-aws iam attach-role-policy --role-name SAM10-Admin --policy-arn arn:aws:iam::aws:policy/AdministratorAccess
-
-say "Group SAM10-Operators"
-aws iam create-group --group-name SAM10-Operators >/dev/null 2>&1 || echo "(group exists)"
-aws iam attach-group-policy --group-name SAM10-Operators --policy-arn arn:aws:iam::aws:policy/ReadOnlyAccess
-aws iam put-group-policy --group-name SAM10-Operators --policy-name manage-own-credentials \
-  --policy-document "file://$P/self-manage-mfa.json"
-sed "s/__ACCOUNT_ID__/$ACCOUNT_ID/g" "$P/assume-admin.json" > /tmp/assume.json
-aws iam put-group-policy --group-name SAM10-Operators --policy-name may-assume-sam10-admin \
-  --policy-document file:///tmp/assume.json
-
-for u in $IAM_USERS; do
-  say "User $u"
-  aws iam create-user --user-name "$u" --tags $TAGS_KV >/dev/null 2>&1 || echo "(user exists)"
-  aws iam add-user-to-group --user-name "$u" --group-name SAM10-Operators
-  if ! aws iam get-login-profile --user-name "$u" >/dev/null 2>&1; then
-    pw="Ll-$(openssl rand -base64 18 | tr -d '/+=')-9a"
-    aws iam create-login-profile --user-name "$u" --password "$pw" --password-reset-required >/dev/null
-    echo "  One-time password for $u (give it to them privately, then clear this screen): $pw"
-  fi
+say "Removing leftovers from the first attempt (SAM10-Admin role, SAM10-Operators group)"
+for p in $(aws iam list-attached-role-policies --role-name SAM10-Admin --query 'AttachedPolicies[].PolicyArn' --output text 2>/dev/null); do
+  aws iam detach-role-policy --role-name SAM10-Admin --policy-arn "$p"
 done
+aws iam delete-role --role-name SAM10-Admin 2>/dev/null && echo "  removed role SAM10-Admin" || echo "  (no SAM10-Admin role)"
+for n in $(aws iam list-group-policies --group-name SAM10-Operators --query 'PolicyNames' --output text 2>/dev/null); do
+  aws iam delete-group-policy --group-name SAM10-Operators --policy-name "$n" 2>/dev/null || true
+done
+aws iam delete-group --group-name SAM10-Operators 2>/dev/null && echo "  removed group SAM10-Operators" || echo "  (no SAM10-Operators group, or not allowed)"
 
-cat <<EOF
+say "Check: IAM users, passwords and access keys (should be none)"
+users=$(aws iam list-users --query 'Users[].UserName' --output text)
+if [[ -z "$users" ]]; then
+  echo "  no IAM users - people sign in with their own AWS logins (Team page) with MFA"
+else
+  for u in $users; do
+    pw=$(aws iam get-login-profile --user-name "$u" >/dev/null 2>&1 && echo yes || echo no)
+    keys=$(aws iam list-access-keys --user-name "$u" --query 'length(AccessKeyMetadata)')
+    printf '  %-20s console password: %-3s  access keys: %s\n' "$u" "$pw" "$keys"
+  done
+fi
 
-Sign-in URL for the IAM users:  https://$ACCOUNT_ID.signin.aws.amazon.com/console
-Next, EACH person:
-  1. signs in, sets a new password
-  2. top-right menu > Security credentials > Assign MFA device (authenticator app)
-  3. signs out and in again (so the session has MFA)
-  4. top-right menu > Switch role: account $ACCOUNT_ID, role SAM10-Admin
-After that, stop using the root user. Screenshot: IAM > Users (with MFA column) = evidence E-12.
+say "Who is running this"
+aws sts get-caller-identity --query Arn --output text
+
+cat <<'EOF'
+
+Next (in the console, not here):
+  1. Menu "<account name>" > Team > invite your partner by e-mail.
+  2. Your partner signs in with their own AWS login and registers their own MFA device.
+  3. Screenshot the Team page (both members) = evidence E-12; your own MFA page = E-12b.
 EOF

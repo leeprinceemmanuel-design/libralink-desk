@@ -26,7 +26,7 @@
     <!-- Replace VIDEO_ID with your YouTube video id (the part after watch?v=). Set the video to Unlisted. -->
     <iframe src="https://www.youtube-nocookie.com/embed/VIDEO_ID" title="LibraLink Desk presentation" allow="accelerometer; encrypted-media; picture-in-picture" allowfullscreen></iframe>
   </div>
-  <p class="stat-label"><span class="fill">FILL: replace VIDEO_ID above</span> · 5–8 minutes · presented by Prince Emmanuel C. Lee and <span class="fill">FILL: partner's name</span>.</p>
+  <p class="stat-label"><span class="fill">FILL: replace VIDEO_ID above</span> · 5–8 minutes · presented by Prince Emmanuel C. Lee and John Micheal Agustin.</p>
 
   <h2>Executive summary (plain English)</h2>
   <h3>What the system does</h3>
@@ -38,7 +38,7 @@
 
   <h3>What we changed</h3>
   <ul>
-    <li><b>Safer access:</b> HTTPS through CloudFront; the server only accepts traffic from CloudFront; no SSH port at all; each of us has our own login with MFA, and admin rights only through a short-lived role.</li>
+    <li><b>Safer access:</b> HTTPS through CloudFront; the server only accepts traffic from CloudFront; no SSH port at all; each of us signs in with our own AWS login and MFA, with no shared logins and no access keys.</li>
     <li><b>No secrets in code:</b> the AI key and encryption keys live in AWS Parameter Store and are read when the app starts.</li>
     <li><b>We can see it working:</b> a dashboard and 12 alarms, including ones that notice when the system is "up but useless" (failed, empty or "not found" answers).</li>
     <li><b>We can get it back:</b> the database is backed up to S3 every hour and we actually restored it and logged back in.</li>
@@ -55,7 +55,7 @@
   <div class="table-wrap"><table>
     <tr><th>Name</th><th>Main role</th><th>Presents in the video</th></tr>
     <tr><td>Prince Emmanuel C. Lee</td><td><span class="fill">FILL: e.g. AI and integration engineer (base system, reskin, AWS wiring)</span></td><td><span class="fill">FILL: sections</span></td></tr>
-    <tr><td><span class="fill">FILL: partner's name</span></td><td><span class="fill">FILL: e.g. reliability engineer (dashboard, alarms, backups, automation, incident)</span></td><td><span class="fill">FILL: sections</span></td></tr>
+    <tr><td>John Micheal Agustin</td><td><span class="fill">FILL: e.g. reliability engineer (dashboard, alarms, backups, automation, incident)</span></td><td><span class="fill">FILL: sections</span></td></tr>
   </table></div>
   <p>Shared: deployment, security and this website. Day-by-day contribution log: <a href="https://github.com/FILL/libralink-desk#contribution-log">README.md</a> <span class="fill">FILL: repo link</span>.</p>
 </main>

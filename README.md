@@ -6,7 +6,7 @@ Administration and Maintenance final project.
 
 - **Live system:** FILL: https://xxxx.cloudfront.net
 - **Project website (all documentation, evidence and the video):** FILL: https://<user>.github.io/libralink-desk/
-- **Team:** Prince Emmanuel C. Lee, FILL: partner's name
+- **Team:** Prince Emmanuel C. Lee, John Micheal Agustin
 
 ## Credits
 
@@ -32,12 +32,12 @@ All university, library and user data in this repository is invented.
 
 ## How it is deployed (short version)
 
-All AWS commands run in **CloudShell** after switching to the `SAM10-Admin` role, so no access keys exist.
+All AWS commands run in **CloudShell**, signed in with each person's own AWS login (with MFA), so no access keys exist.
 
 ```bash
 git clone https://github.com/FILL/libralink-desk.git && cd libralink-desk
 ALERT_EMAILS="a@example.com,b@example.com" bash ops/aws/01-budget.sh
-IAM_USERS="lee partner" bash ops/aws/02-iam.sh          # as root, once
+bash ops/aws/02-iam.sh                                   # checks: no IAM passwords or keys
 bash ops/aws/03-s3.sh
 bash ops/aws/04-params.sh                                # asks for the Gemini key (hidden)
 ALERT_EMAILS="a@example.com,b@example.com" bash ops/aws/05-sns-logs.sh
@@ -84,7 +84,7 @@ starts. `bash ops/check-secrets.sh` scans the files and the whole git history fo
 
 Who did what, day by day (evidence for the 15% individual mark). Keep this honest and up to date.
 
-| Day / date | Prince Emmanuel C. Lee | FILL: partner |
+| Day / date | Prince Emmanuel C. Lee | John Micheal Agustin |
 |---|---|---|
 | Day 1 — FILL date | FILL | FILL |
 | Day 2 — FILL date | FILL | FILL |

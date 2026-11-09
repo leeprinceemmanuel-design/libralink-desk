@@ -28,6 +28,9 @@ aws budgets create-budget --account-id "$ACCOUNT_ID" \
   && echo "Budget created." || echo "(Budget may already exist - check Billing > Budgets.)"
 
 say "Turning on EBS encryption by default in $AWS_REGION"
-aws ec2 enable-ebs-encryption-by-default --query EbsEncryptionByDefault
+# Blocked on the AWS Free plan (service control policy). Not a problem: 06-ec2.sh encrypts
+# the server's disk itself (Encrypted=true), so every disk we create is still encrypted.
+aws ec2 enable-ebs-encryption-by-default --query EbsEncryptionByDefault \
+  || echo "  (not allowed on this account's plan - our disks are encrypted by 06-ec2.sh instead)"
 
 say "Done. Screenshot: Billing > Budgets > libralink-monthly (evidence for cost / E-16)."

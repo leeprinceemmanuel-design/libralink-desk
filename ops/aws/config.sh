@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 # Shared settings for the ops/aws/*.sh scripts. These run in AWS CloudShell
-# (after you "Switch role" to SAM10-Admin), so no access keys are ever created.
+# signed in with your own AWS login (with MFA), so no access keys are ever created.
 # Every script does:  source "$(dirname "$0")/config.sh"
 set -euo pipefail
 
-export AWS_REGION="${LL_REGION:-ap-southeast-1}"   # always Singapore (CloudShell sets AWS_REGION to the console region)
+# Always Singapore (closest to the Philippines). CloudShell sets AWS_REGION to whatever region the
+# console is showing, so we do NOT reuse it; set LL_REGION only if you really want another region.
+export AWS_REGION="${LL_REGION:-ap-southeast-1}"
 export AWS_DEFAULT_REGION="$AWS_REGION"
 export AWS_PAGER=""
 

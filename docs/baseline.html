@@ -22,7 +22,7 @@
     <tr><td>Application</td><td>Stock LibreChat: its own name and logo, model picker, agents, presets, public sign-up page, no system prompt, no knowledge of any library.</td><td>Not our system, and every enabled feature is something to secure.</td></tr>
     <tr><td>Address</td><td>Plain <code>http://ec2-…compute.amazonaws.com</code> — no padlock, browser shows "Not secure".</td><td>Passwords and chats cross the internet unencrypted.</td></tr>
     <tr><td>Network</td><td>Security group: port 80 open to <code>0.0.0.0/0</code> (the whole internet).</td><td>Anyone can reach the server directly, bypassing anything put in front of it.</td></tr>
-    <tr><td>AWS account</td><td>Root user only. Root MFA: <span class="fill">FILL: on / off when you started</span>. No IAM users, no CloudTrail trail (only the default 90-day event history).</td><td>One shared all-powerful login, no proper audit trail.</td></tr>
+    <tr><td>AWS account</td><td>New Free-plan account: one owner login with <b>no MFA</b>, partner not added, no CloudTrail trail (only the default 90-day event history).</td><td>One shared all-powerful login, no proper audit trail.</td></tr>
     <tr><td>Monitoring</td><td>Only the default EC2 metrics (CPU, network). No memory or disk metrics, no alarms, no dashboard, no application logs in CloudWatch.</td><td>A crash or full disk would go unnoticed until a user complained.</td></tr>
     <tr><td>Backups</td><td>None. The database lives only on the server's disk.</td><td>Losing the server means losing every account and conversation.</td></tr>
     <tr><td>Logs</td><td>Log files under <code>/var/log/libralink</code> with no size limit or rotation.</td><td>A runaway log can fill the disk (this became our incident).</td></tr>

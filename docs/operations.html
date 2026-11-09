@@ -99,22 +99,24 @@
   <h3>Before and after</h3>
   <div class="table-wrap"><table>
     <tr><th>Problem found</th><th>Before</th><th>After</th></tr>
-    <tr><td>Who can change things</td><td>Root user only</td><td>One IAM user each, MFA on, admin rights only through the <code>SAM10-Admin</code> role (MFA required, 1 hour max); root not used</td></tr>
-    <tr><td>Access keys</td><td>—</td><td>None at all: all command-line work in CloudShell after switching role</td></tr>
+    <tr><td>Who can change things</td><td>Only the account owner's login, no MFA</td><td>Each person signs in with their <b>own</b> AWS login and their <b>own</b> MFA device; the partner was added through the console's Team page; no shared logins</td></tr>
+    <tr><td>Access keys</td><td>—</td><td>None at all: all command-line work is done in CloudShell, which uses the signed-in person's login</td></tr>
     <tr><td>Traffic to users</td><td>Plain HTTP</td><td>HTTPS via CloudFront; HTTP redirected</td></tr>
     <tr><td>Server exposure</td><td>Port 80 open to <code>0.0.0.0/0</code></td><td>Port 80 only from CloudFront's managed address list; no SSH port; Session Manager for admin</td></tr>
     <tr><td>Database exposure</td><td>Not published (LibreChat default)</td><td>Still not published: MongoDB is only on the private Docker network</td></tr>
     <tr><td>Secrets</td><td>Would normally sit in LibreChat's <code>.env</code> file</td><td>In Parameter Store (SecureString); read into memory at start-up; git history scanned</td></tr>
     <tr><td>Server permissions</td><td>—</td><td>Instance role limited to our parameters, our bucket's <code>content/</code> and <code>backups/</code>, our log groups, metrics and one SNS topic</td></tr>
     <tr><td>Audit trail</td><td>90-day event history only</td><td>CloudTrail trail with log-file validation, own private bucket</td></tr>
-    <tr><td>Data at rest</td><td>—</td><td>EBS encryption by default; S3 encryption; GuardDuty on</td></tr>
+    <tr><td>Data at rest</td><td>—</td><td>Server disk encrypted (set in our launch script); S3 encryption; GuardDuty on</td></tr>
     <tr><td>Public sign-up</td><td>Anyone could register</td><td>Registration off; we create accounts</td></tr>
   </table></div>
 
+  <div class="warn"><b>Why there are no IAM users.</b> Our account is on the AWS Free plan, which puts AWS's own rules (service control policies) above our account. We tested them on 9 Nov 2026: IAM roles were allowed, but giving an IAM user a console password and creating IAM groups were blocked ("explicit deny in a service control policy"). So instead of the brief's suggested IAM users and admin role, each of us signs in with our own AWS login and MFA, added through AWS's Team page. The goals stay the same: no shared logins, MFA for every person, no access keys. Turning on EBS encryption by default was blocked the same way, so our launch script encrypts the disk itself.</div>
+
   <h3>Each control, and the risk it addresses</h3>
   <ul>
-    <li><b>MFA on every console user</b> — a stolen password alone is not enough to get in.</li>
-    <li><b>Own IAM user each, admin via role</b> — we can see who did what, and nobody walks around with admin rights all day.</li>
+    <li><b>Own login and MFA for each person</b> — a stolen password alone is not enough to get in, and CloudTrail shows which of us did what.</li>
+    <li><b>Least-privilege roles for machines</b> — the server and the health check each have a role with only the permissions they need; no person and no program holds a long-lived access key.</li>
     <li><b>No keys in code or git history</b> — a public repository cannot leak our Gemini key; <code>ops/check-secrets.sh</code> scans every commit.</li>
     <li><b>Personal-data check</b> — questions that look like they contain an e-mail, phone or ID number are redacted in our logs and raise an alarm, so we notice if anyone sends personal data to the external model.</li>
     <li><b>Server only reachable from CloudFront, database not reachable at all</b> — attackers cannot skip HTTPS or reach MongoDB directly.</li>
@@ -126,9 +128,12 @@
   </ul>
 
   <div class="pair">
-    <figure class="ev"><img src="evidence/E-12-iam-mfa.png" alt="IAM users with MFA">
-      <div class="ev-missing">📷 Add <code>evidence/E-12-iam-mfa.png</code>: IAM › Users list showing both users with MFA "Virtual", and no access keys (or the E-12 section of <code>12-evidence.sh</code>).</div>
-      <figcaption><b>E-12</b> Our IAM users, MFA on, no access keys.</figcaption></figure>
+    <figure class="ev"><img src="evidence/E-12-team.png" alt="Team page with both members">
+      <div class="ev-missing">📷 Add <code>evidence/E-12-team.png</code>: the console's Team page showing both members (crop out e-mail addresses if you like).</div>
+      <figcaption><b>E-12</b> Both of us have our own login on the account.</figcaption></figure>
+    <figure class="ev"><img src="evidence/E-12b-owner-mfa.png" alt="MFA device registered on the owner login">
+      <div class="ev-missing">📷 Add <code>evidence/E-12b-owner-mfa.png</code>: the MFA devices box of your AWS login's Security page.</div>
+      <figcaption><b>E-12b</b> MFA registered on the account owner's login (<span class="fill">FILL: add John's too, as E-12c, if you can</span>).</figcaption></figure>
     <figure class="ev"><img src="evidence/E-13-parameter-store.png" alt="Parameter Store list of names">
       <div class="ev-missing">📷 Add <code>evidence/E-13-parameter-store.png</code>: Systems Manager › Parameter Store list (names and types only — NEVER click "Show" on a SecureString value).</div>
       <figcaption><b>E-13</b> Settings and secrets in Parameter Store.</figcaption></figure>

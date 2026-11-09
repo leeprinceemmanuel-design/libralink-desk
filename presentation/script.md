@@ -1,6 +1,6 @@
 # LibraLink Desk — presentation script (target 7 minutes)
 
-Two speakers: **A** = Prince Emmanuel C. Lee, **B** = partner. Swap sections to match who actually
+Two speakers: **A** = Prince Emmanuel C. Lee, **B** = John Micheal Agustin. Swap sections to match who actually
 built what (the brief marks the part each person presents). Speak in your own words — this is a
 guide, not something to read word for word.
 
@@ -42,7 +42,7 @@ Gemini and back → saved in MongoDB, logged to CloudWatch.
 - "Fix: removed the file. Prevention: log rotation with a 50 MB cap every 15 minutes, and a journal cap. We proved it by writing a 120 MB log and watching it get rotated."
 
 ### 5:50 – 6:30 · Security (A) — show the before/after table
-"Each of us has our own login with MFA; admin rights only through a one-hour role; no access keys at all.
+"Each of us has our own AWS login with MFA, no shared logins and no access keys at all. The free plan blocks IAM console users, so people come in through AWS's Team page and only machines get IAM roles.
 The server only accepts CloudFront, has no SSH port, and our secret scan shows no keys in any commit."
 
 ### 6:30 – 7:00 · Results and next steps (both) — show Results, then Next steps
