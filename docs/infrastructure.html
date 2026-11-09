@@ -11,6 +11,7 @@
     <div class="kicker">WS-A item 4 · Evidence E-18</div>
     <h1>AWS infrastructure design</h1>
     <p class="lead">Where every part of LibraLink Desk runs, and how one question travels from the user to the AI model and back. One region, one server, one database — on purpose.</p>
+  <div class="note"><b>Why Sydney, not Singapore?</b> Singapore is closer to the Philippines and was our first choice (and our midterm design). But our AWS Free-plan account is locked to one region by AWS's own rules: on 9 Nov 2026 we tested creating an S3 bucket, a parameter, an SNS topic, an EC2 server (dry run) and listing Lambda functions in three regions. All were denied in Singapore and us-east-1 and allowed only in Sydney (ap-southeast-2). The cost is a little extra delay for users in the Philippines, which is small next to the AI model's answer time.</div>
   </div>
 
   <div class="diagram" role="img" aria-label="Architecture diagram of LibraLink Desk on AWS">
@@ -38,7 +39,7 @@
 
     <!-- region -->
     <rect class="d-region" x="395" y="20" width="680" height="690" rx="16"/>
-    <text class="d-frame-t" x="412" y="44">AWS REGION ap-southeast-1 (SINGAPORE)</text>
+    <text class="d-frame-t" x="412" y="44">AWS REGION ap-southeast-2 (SYDNEY)</text>
 
     <rect class="d-frame" x="410" y="60" width="350" height="480" rx="12"/>
     <text class="d-frame-t" x="424" y="82">DEFAULT VPC · PUBLIC SUBNET</text>

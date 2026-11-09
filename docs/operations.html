@@ -111,7 +111,7 @@
     <tr><td>Public sign-up</td><td>Anyone could register</td><td>Registration off; we create accounts</td></tr>
   </table></div>
 
-  <div class="warn"><b>Why there are no IAM users.</b> Our account is on the AWS Free plan, which puts AWS's own rules (service control policies) above our account. We tested them on 9 Nov 2026: IAM roles were allowed, but giving an IAM user a console password and creating IAM groups were blocked ("explicit deny in a service control policy"). So instead of the brief's suggested IAM users and admin role, each of us signs in with our own AWS login and MFA, added through AWS's Team page. The goals stay the same: no shared logins, MFA for every person, no access keys. Turning on EBS encryption by default was blocked the same way, so our launch script encrypts the disk itself.</div>
+  <div class="warn"><b>Why there are no IAM users.</b> Our account is on the AWS Free plan, which puts AWS's own rules (service control policies) above our account. We tested them on 9 Nov 2026: IAM roles were allowed, but giving an IAM user a console password and creating IAM groups were blocked ("explicit deny in a service control policy"). So instead of the brief's suggested IAM users and admin role, each of us signs in with our own AWS login and MFA, added through AWS's Team page. The goals stay the same: no shared logins, MFA for every person, no access keys. Turning on EBS encryption by default was blocked the same way, so our launch script encrypts the disk itself. The same rules also lock the account to one region, Sydney (ap-southeast-2) — see the <a href="infrastructure.html">AWS design</a> page.</div>
 
   <h3>Each control, and the risk it addresses</h3>
   <ul>

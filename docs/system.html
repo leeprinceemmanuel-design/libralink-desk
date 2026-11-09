@@ -84,7 +84,7 @@
 
   <h3>7. How it is served</h3>
   <ul>
-    <li><b>Where it runs:</b> one EC2 instance (<span class="fill">FILL: type</span>, Amazon Linux 2023) in ap-southeast-1 (Singapore), behind CloudFront.</li>
+    <li><b>Where it runs:</b> one EC2 instance (<span class="fill">FILL: type</span>, Amazon Linux 2023) in ap-southeast-2 (Sydney), behind CloudFront.</li>
     <li><b>What calls it:</b> users at <span class="fill">FILL: https://xxxx.cloudfront.net</span>; LibreChat's chat API under <code>/api/</code>; health check at <code>/health</code>.</li>
     <li><b>The model behind it:</b> Google <span class="fill">FILL: model name, e.g. gemini-2.5-flash</span> via the Gemini API, free tier, temperature 0.2.</li>
     <li><b>If the model or service is unavailable:</b> the user sees an error message in the chat instead of an answer; the answer is logged as failed, and the <code>libralink-answers-failed-rate</code> alarm e-mails us. If the free-tier limit is hit, Gemini returns HTTP 429 (too many requests) until the limit resets.</li>

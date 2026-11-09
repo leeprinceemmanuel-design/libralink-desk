@@ -4,9 +4,11 @@
 # Every script does:  source "$(dirname "$0")/config.sh"
 set -euo pipefail
 
-# Always Singapore (closest to the Philippines). CloudShell sets AWS_REGION to whatever region the
-# console is showing, so we do NOT reuse it; set LL_REGION only if you really want another region.
-export AWS_REGION="${LL_REGION:-ap-southeast-1}"
+# Always Sydney. Our AWS Free-plan account is locked to ap-southeast-2: a test on 9 Nov 2026
+# showed S3, Parameter Store, SNS, EC2 and Lambda all denied in Singapore (ap-southeast-1) and
+# us-east-1, and allowed in Sydney. CloudShell sets AWS_REGION to whatever region the console
+# shows, so we do NOT reuse it; set LL_REGION only if you really want another region.
+export AWS_REGION="${LL_REGION:-ap-southeast-2}"
 export AWS_DEFAULT_REGION="$AWS_REGION"
 export AWS_PAGER=""
 

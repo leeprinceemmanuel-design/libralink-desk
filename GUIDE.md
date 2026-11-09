@@ -59,7 +59,7 @@ Our account is on the AWS **Free plan**. It signs the owner in through an AWS-ma
 **blocks IAM console users and groups**, so people are added through the **Team** page instead.
 1. Owner login MFA: menu (account name, top right) → **Profile** → **Manage profile** → **Security** →
    **Register device** (authenticator app). 📷 **E-12b** → `E-12b-owner-mfa.png` (MFA box only).
-2. Make sure the console address says `region=ap-southeast-1` (Singapore).
+2. Make sure the console address says `region=ap-southeast-2` (Sydney). Our Free-plan account only allows this region.
 3. Open **CloudShell** (bottom-left) and get the code:
    ```bash
    git clone https://github.com/<your-user>/libralink-desk.git && cd libralink-desk
