@@ -15,7 +15,7 @@ if [[ -z "${GOOGLE_KEY:-}" ]]; then
   read -r -s -p "Paste your Gemini API key (hidden): " GOOGLE_KEY; echo
 fi
 export GOOGLE_KEY
-export GOOGLE_MODEL="${GOOGLE_MODEL:-gemini-2.5-flash}"
+export GOOGLE_MODEL="${GOOGLE_MODEL:-gemini-3.5-flash-lite}"
 export LIBRECHAT_IMAGE="${LIBRECHAT_IMAGE:-ghcr.io/danny-avila/librechat:latest}"
 export PUBLIC_URL=http://localhost:8080 SITE_URL=http://localhost:8080 HTTP_PORT=8080
 

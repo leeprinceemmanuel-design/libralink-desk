@@ -2,7 +2,8 @@
 # DAY 2, STEP 3 - audit trail and threat detection (WS-D items 6 and 8).
 #   bash ops/aws/11-audit.sh
 # - CloudTrail trail "libralink-trail" writing to its own private bucket (who did what)
-# - GuardDuty switched on (30-day free trial; any finding goes on the Security page)
+# - GuardDuty: BLOCKED on our Free-plan account (explicit deny in a service control policy, 9 Nov 2026).
+#   The script tries it and carries on if it is not allowed.
 source "$(dirname "$0")/config.sh"
 
 say "CloudTrail bucket s3://$TRAIL_BUCKET"
@@ -29,9 +30,9 @@ aws cloudtrail start-logging --name libralink-trail
 aws cloudtrail get-trail-status --name libralink-trail --query '{Logging:IsLogging,LatestDelivery:LatestDeliveryTime}'
 
 say "GuardDuty"
-DET=$(aws guardduty list-detectors --query 'DetectorIds[0]' --output text)
-if [[ "$DET" == "None" ]]; then
-  DET=$(aws guardduty create-detector --enable --tags "Project=$PROJECT,Team=$TEAM" --query DetectorId --output text)
+if DET=$(aws guardduty list-detectors --query 'DetectorIds[0]' --output text 2>/dev/null); then
+  [[ "$DET" == "None" ]] && DET=$(aws guardduty create-detector --enable --tags "Project=$PROJECT,Team=$TEAM" --query DetectorId --output text)
+  echo "  detector $DET enabled"
+else
+  echo "  GuardDuty is not allowed on this account's plan (service control policy) - skipped"
 fi
-echo "  detector $DET enabled"
-aws guardduty list-findings --detector-id "$DET" --query 'FindingIds' --output json

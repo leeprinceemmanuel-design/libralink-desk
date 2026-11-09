@@ -63,5 +63,5 @@ aws iam delete-role --role-name libralink-ec2-role 2>/dev/null || true
 aws iam detach-role-policy --role-name libralink-healthcheck-role --policy-arn arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole 2>/dev/null || true
 aws iam delete-role-policy --role-name libralink-healthcheck-role --policy-name put-libralink-metrics 2>/dev/null || true
 aws iam delete-role --role-name libralink-healthcheck-role 2>/dev/null || true
-echo "Left on purpose: the budget, GuardDuty (disable in its console), and your partner on the Team page."
+echo "Left on purpose: the budget and your partner on the Team page."
 echo "Then tell your instructor everything is shut down (brief section 6.2)."

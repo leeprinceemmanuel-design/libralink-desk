@@ -7,7 +7,7 @@
 # Existing secrets are NOT overwritten (changing CREDS_KEY would break stored data).
 source "$(dirname "$0")/config.sh"
 
-GOOGLE_MODEL="${GOOGLE_MODEL:-gemini-2.5-flash}"
+GOOGLE_MODEL="${GOOGLE_MODEL:-gemini-3.5-flash-lite}"   # 2.5-flash was retired for new keys; 3.8-flash took 3+ min (tested 9 Nov 2026)
 APP_VERSION="${APP_VERSION:-v1.0}"
 LIBRECHAT_IMAGE="${LIBRECHAT_IMAGE:-ghcr.io/danny-avila/librechat:latest}"
 SITE_URL="${SITE_URL:-https://example.github.io/libralink-desk}"

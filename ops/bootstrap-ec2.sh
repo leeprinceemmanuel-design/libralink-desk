@@ -20,7 +20,9 @@ usermod -aG docker ec2-user
 
 # Docker Compose v2 plugin (not packaged for Amazon Linux 2023).
 mkdir -p /usr/local/lib/docker/cli-plugins
-curl -fsSL "https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64" \
+# --retry: GitHub sometimes answers 504 for a moment (this stopped our first boot on 9 Nov 2026).
+curl -fsSL --retry 6 --retry-delay 10 --retry-all-errors \
+  "https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64" \
   -o /usr/local/lib/docker/cli-plugins/docker-compose
 chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
 docker compose version
@@ -34,7 +36,8 @@ fi
 
 # Get the code.
 rm -rf /opt/libralink
-git clone --depth 1 --branch "$REPO_BRANCH" "$REPO_URL" /opt/libralink
+for i in 1 2 3 4 5; do git clone --depth 1 --branch "$REPO_BRANCH" "$REPO_URL" /opt/libralink && break; rm -rf /opt/libralink; sleep 10; done
+[[ -d /opt/libralink/ops ]]
 chmod +x /opt/libralink/ops/*.sh /opt/libralink/ops/fault/*.sh
 
 mkdir -p /var/log/libralink/nginx /var/lib/libralink

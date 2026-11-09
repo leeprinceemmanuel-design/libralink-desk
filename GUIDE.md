@@ -108,7 +108,7 @@ Check the model name works and record versions (in Session Manager):
 sudo python3 /opt/libralink/eval/eval.py --list-models | grep -i flash
 sudo docker exec LibreChat node -p "require('/app/package.json').version"
 ```
-If `gemini-2.5-flash` is not listed, pick a listed flash model and in CloudShell run
+We use `gemini-3.5-flash-lite` (2.5-flash was retired for new keys; 3.8-flash took over 3 minutes). To change model, in CloudShell run
 `aws ssm put-parameter --name /libralink/config/GOOGLE_MODEL --type String --overwrite --value <model>`,
 then on the server `sudo systemctl restart libralink`.
 
@@ -200,19 +200,19 @@ bash ops/aws/12-evidence.sh            # CloudShell
 ```
 - 📷 **E-12** → `E-12-team.png` if not taken yet (Team page, both members).
 - On your laptop: `bash ops/check-secrets.sh` → 📷 **E-13b** → `E-13b-secret-scan.png`.
-- GuardDuty console → Findings: write "none" or explain each on the Operations page.
 
 ### Step 15 — (Optional, good for marks) right-size
-Look at the dashboard's memory line over the day. If the average is under ~45% on t3.medium, try t3.small
-(CloudShell):
+The Free plan only allows Free Tier sizes, so we started on **t3.small** (2 GB). Watch the dashboard's
+memory line over the day. If it averages above ~80% or the memory alarm fires, move to **c7i-flex.large**
+(4 GB, also Free Tier) in CloudShell:
 ```bash
 source ops/aws/.state      # loads INSTANCE_ID saved by 06-ec2.sh
-aws ec2 stop-instances --instance-ids $INSTANCE_ID && aws ec2 wait instance-stopped --instance-ids $INSTANCE_ID
-aws ec2 modify-instance-attribute --instance-id $INSTANCE_ID --instance-type '{"Value":"t3.small"}'
-aws ec2 start-instances --instance-ids $INSTANCE_ID
+aws ec2 stop-instances --region ap-southeast-2 --instance-ids $INSTANCE_ID && aws ec2 wait instance-stopped --region ap-southeast-2 --instance-ids $INSTANCE_ID
+aws ec2 modify-instance-attribute --region ap-southeast-2 --instance-id $INSTANCE_ID --instance-type '{"Value":"c7i-flex.large"}'
+aws ec2 start-instances --region ap-southeast-2 --instance-ids $INSTANCE_ID
 ```
-The Elastic IP keeps the address, so CloudFront keeps working. Some alarms will fire while it is stopped — that is expected; note it.
-Compare equal periods (e.g. 6 hours before vs 6 hours after) for memory, answer time and cost on the Results page.
+If memory stays low, keep t3.small and say so on the Results page: "measured, and it is enough" is a valid result.
+Compare equal periods (e.g. 6 hours before vs 6 hours after) for memory, answer time and cost.
 
 ---
 

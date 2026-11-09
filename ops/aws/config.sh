@@ -20,7 +20,7 @@ export BUCKET="libralink-content-$ACCOUNT_ID"          # handbook content + back
 export TRAIL_BUCKET="libralink-cloudtrail-$ACCOUNT_ID"
 export TOPIC_NAME=libralink-alerts
 export INSTANCE_NAME=libralink-server
-export INSTANCE_TYPE="${INSTANCE_TYPE:-t3.medium}"
+export INSTANCE_TYPE="${INSTANCE_TYPE:-t3.small}"   # Free plan allows only Free Tier sizes (t3.small = 2 GB)
 export PARAM_PREFIX=/libralink
 export LOG_GROUPS="/libralink/app /libralink/mongodb /libralink/requests /libralink/nginx /libralink/automation /libralink/healthcheck"
 

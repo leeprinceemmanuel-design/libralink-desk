@@ -55,14 +55,14 @@ def ssm(name, decrypt=False):
     return subprocess.check_output(cmd, text=True).strip()
 
 
-def call(url, key, body=None):
+def call(url, key, body=None, timeout=60):
     req = urllib.request.Request(url, data=json.dumps(body).encode() if body else None,
                                  headers={"x-goog-api-key": key, "Content-Type": "application/json"})
-    with urllib.request.urlopen(req, timeout=60) as r:
+    with urllib.request.urlopen(req, timeout=timeout) as r:
         return json.loads(r.read())
 
 
-def ask(model, key, system_prompt, question, retries=3):
+def ask(model, key, system_prompt, question, retries=3, timeout=180):
     body = {
         "systemInstruction": {"parts": [{"text": system_prompt}]},
         "contents": [{"role": "user", "parts": [{"text": question}]}],
@@ -71,7 +71,7 @@ def ask(model, key, system_prompt, question, retries=3):
     for attempt in range(retries):
         try:
             start = time.time()
-            data = call(f"{API}/models/{model}:generateContent", key, body)
+            data = call(f"{API}/models/{model}:generateContent", key, body, timeout)
             parts = data.get("candidates", [{}])[0].get("content", {}).get("parts", [])
             text = "".join(p.get("text", "") for p in parts if not p.get("thought"))
             return text, int((time.time() - start) * 1000), ""
@@ -102,6 +102,7 @@ def main():
     ap.add_argument("--delay", type=float, default=7)
     ap.add_argument("--content", default=str(ROOT / "run" / "content"))
     ap.add_argument("--list-models", action="store_true")
+    ap.add_argument("--timeout", type=float, default=180, help="seconds to wait for one answer (newer models think longer)")
     args = ap.parse_args()
 
     key = os.environ.get("GOOGLE_KEY") or ssm("/libralink/secret/GOOGLE_KEY", decrypt=True)
@@ -128,7 +129,7 @@ def main():
 
     rows, passed = [], 0
     for i, q in enumerate(questions):
-        answer, ms, err = ask(model, key, system_prompt, q["question"])
+        answer, ms, err = ask(model, key, system_prompt, q["question"], timeout=args.timeout)
         ok = (not err) and score(answer, q)
         passed += ok
         rows.append({"id": q["id"], "category": q["category"], "pass": ok, "ms": ms, "error": err,

@@ -109,8 +109,8 @@
     <text class="d-t" x="587" y="602">CloudTrail</text>
     <text class="d-s" x="587" y="620">who did what, when</text>
     <rect class="d-box-alt" x="740" y="578" width="152" height="70" rx="8"/>
-    <text class="d-t" x="752" y="602">GuardDuty</text>
-    <text class="d-s" x="752" y="620">threat findings</text>
+    <text class="d-t" x="752" y="602">Encryption</text>
+    <text class="d-s" x="752" y="620">disk + S3 at rest</text>
     <rect class="d-box-alt" x="905" y="578" width="155" height="70" rx="8"/>
     <text class="d-t" x="917" y="602">AWS Budgets</text>
     <text class="d-s" x="917" y="620">monthly cost alert</text>
@@ -151,7 +151,7 @@
   <h2>Every service, and what it is for</h2>
   <div class="table-wrap"><table>
     <tr><th>Service</th><th>What we run</th><th>Why</th></tr>
-    <tr><td>EC2</td><td><code>libralink-server</code>, Amazon Linux 2023, <span class="fill">FILL: t3.medium or t3.small after right-sizing</span>, 20 GB gp3 encrypted, IMDSv2 required, Elastic IP</td><td>Runs the three containers. One server is enough for a class-sized load.</td></tr>
+    <tr><td>EC2</td><td><code>libralink-server</code>, Amazon Linux 2023, t3.small (2 GB; the Free plan only allows Free Tier sizes)<span class="fill">FILL (if resized): , later c7i-flex.large</span>, 20 GB gp3 encrypted, IMDSv2 required, Elastic IP</td><td>Runs the three containers. One server is enough for a class-sized load.</td></tr>
     <tr><td>Docker containers</td><td>nginx 1.27, LibreChat <span class="fill">FILL: exact version from the login page or <code>docker inspect</code></span>, MongoDB 8.0</td><td>LibreChat ships as containers; one <code>docker compose</code> file starts the stack.</td></tr>
     <tr><td>CloudFront</td><td>One distribution, HTTPS only, caching disabled, origin = the Elastic IP's DNS name</td><td>Free HTTPS without buying a domain; hides the server behind AWS's edge.</td></tr>
     <tr><td>S3</td><td><code>libralink-content-&lt;account&gt;</code>: <code>content/</code> (handbook) and <code>backups/</code></td><td>The handbook lives outside the server, versioned; backups survive the server being lost.</td></tr>
@@ -159,7 +159,7 @@
     <tr><td>CloudWatch</td><td>Agent metrics, 6 log groups, metric filters, 12 alarms, dashboard</td><td>See it working (WS-B).</td></tr>
     <tr><td>SNS</td><td>Topic <code>libralink-alerts</code> with both e-mail addresses</td><td>Alarms reach real people.</td></tr>
     <tr><td>Lambda + EventBridge</td><td><code>libralink-healthcheck</code>, every 15 minutes</td><td>Checks the public site from outside the server.</td></tr>
-    <tr><td>IAM, CloudTrail, GuardDuty, Budgets</td><td>Own AWS login + MFA per person (Team page); least-privilege roles for the server and Lambda; one trail; GuardDuty detector; a monthly budget</td><td>Security and cost controls (WS-D, section 6).</td></tr>
+    <tr><td>IAM, CloudTrail, Budgets</td><td>Own AWS login + MFA per person (Team page); least-privilege roles for the server and Lambda; one trail; a monthly budget (GuardDuty is blocked on the Free plan)</td><td>Security and cost controls (WS-D, section 6).</td></tr>
     <tr><td>Not used (and why)</td><td>RDS, load balancer, Kubernetes, a second region</td><td>LibreChat's database is MongoDB, which RDS does not run; one server needs no load balancer. Keeping it small is a brief requirement.</td></tr>
   </table></div>
 
