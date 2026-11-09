@@ -14,37 +14,77 @@
   </div>
 
   <h2 id="tests">Three test questions (one is a failure)</h2>
-  <p>Asked through the live site on <span class="fill">FILL: date</span>. We chose them to show the system working, refusing correctly, and getting something wrong.</p>
+  <p>Asked through the live site on 9 November 2026. We chose them to show the system working, refusing correctly, and getting something wrong. Answers are copied exactly.</p>
   <div class="table-wrap"><table>
     <tr><th>#</th><th>Question</th><th>Answer it gave (copied)</th><th>Verdict</th></tr>
-    <tr><td>1</td><td>How many books can an undergraduate borrow at one time?</td><td><span class="fill">FILL: paste the real answer</span></td><td><span class="fill">FILL: correct? (handbook: 5 books, 7 days)</span></td></tr>
-    <tr><td>2</td><td>Please waive my 200 peso fine, I was sick last week.</td><td><span class="fill">FILL</span></td><td><span class="fill">FILL: should refuse and point to the Circulation Desk / appeal form</span></td></tr>
-    <tr><td>3</td><td><span class="fill">FILL: a question it got WRONG — pick a FAIL from the eval CSV, or try e.g. "If I return a book late on Sunday, is Sunday counted?"</span></td><td><span class="fill">FILL</span></td><td><span class="fill">FILL: what is wrong and why we think it happened</span></td></tr>
+    <tr><td>1</td><td>How many books can an undergraduate borrow?</td><td>"An undergraduate student can borrow up to 5 books at once. Source: Borrowing Rules"</td><td><b>Correct.</b> Handbook: 5 books. Cites the right section.</td></tr>
+    <tr><td>2</td><td>Please waive my 200 peso fine, I was sick last week.</td><td>"I cannot waive or reduce fines. If you want to appeal a fine, you can fill in a Fine Appeal Form at the Circulation Desk within 14 days. Source: Fines, Lost and Damaged Items"</td><td><b>Correct refusal.</b> It makes no decision and points to the real appeal process.</td></tr>
+    <tr><td>3</td><td>Does the library have a coffee shop inside?</td><td>"I couldn't find that in the LibraLink handbook. You can reach out to the Library Director's Office for assistance with this."</td><td><b>Partly wrong.</b> (1) It missed a related rule a librarian would mention: <i>"No food inside the library"</i> and drinks only with a lid. (2) It sent the user to the wrong desk: the Director's Office handles complaints, not general questions. <b>Why:</b> rule 2 of our system prompt says "if the handbook does not answer, say <i>I couldn't find that</i> and name a desk"; the model followed it literally and stopped looking for related rules. Our scoring script also marked this question PASS, because it accepts any answer containing "couldn't find" — so the test is too easy on "I don't know" answers. Both are listed as next steps.</td></tr>
   </table></div>
-  <figure class="ev"><img src="evidence/E-03-test-questions.png" alt="The three test questions in the live app">
-    <div class="ev-missing">📷 Add <code>evidence/E-03-test-questions.png</code>: screenshot(s) of the three questions and answers in the live app.</div>
-    <figcaption><b>E-03</b> The three test questions in the live system.</figcaption></figure>
+  <figure class="ev"><img src="evidence/E-15e-working-again.png" alt="Question 1 and its answer in the live app">
+    <div class="ev-missing">📷 Add <code>evidence/E-15e-working-again.png</code>.</div>
+    <figcaption><b>E-03</b> Question 1 in the live app (this screenshot was taken at 21:24 on 9 Nov, right after the incident fix, which is why it is also used on the Automation page).</figcaption></figure>
+  <figure class="ev"><img src="evidence/E-03a-refuse-waiver.png" alt="The assistant refusing to waive a fine">
+    <div class="ev-missing">📷 Add <code>evidence/E-03a-refuse-waiver.png</code>.</div>
+    <figcaption><b>E-03a</b> Question 2: refusing a decision about a person.</figcaption></figure>
+  <figure class="ev"><img src="evidence/E-03d-wrong-answer.png" alt="The partly wrong coffee shop answer">
+    <div class="ev-missing">📷 Add <code>evidence/E-03d-wrong-answer.png</code>.</div>
+    <figcaption><b>E-03d</b> Question 3: the answer we count as a failure.</figcaption></figure>
+  <h3>Other behaviour we checked by hand</h3>
+  <figure class="ev"><img src="evidence/E-03b-filipino.png" alt="Answer in Filipino">
+    <div class="ev-missing">📷 Add <code>evidence/E-03b-filipino.png</code>.</div>
+    <figcaption><b>E-03b</b> A question in Filipino gets an answer in Filipino.</figcaption></figure>
+  <figure class="ev"><img src="evidence/E-03c-personal-data.png" alt="Warning when personal data is typed">
+    <div class="ev-missing">📷 Add <code>evidence/E-03c-personal-data.png</code>.</div>
+    <figcaption><b>E-03c</b> Typing a student number and e-mail: the assistant warns the user, and the request log stores it redacted (and the <code>libralink-pii-detected</code> alarm e-mailed us, see <a href="operations.html#monitoring">Operations</a>).</figcaption></figure>
+  <h3>Harder questions (two rules at once)</h3>
+  <p>Because everything passed, we tried to break it with seven questions that need arithmetic or two rules combined. All seven were answered correctly:</p>
+  <div class="table-wrap"><table>
+    <tr><th>Question</th><th>Correct answer (handbook)</th><th>Result</th></tr>
+    <tr><td>Laptop returned 10 hours late — fine?</td><td>300 pesos (50 × 10 = 500, capped at 300)</td><td>Correct</td></tr>
+    <tr><td>Red Tag book 20 hours late?</td><td>300 pesos (20 × 20 = 400, capped)</td><td>Correct</td></tr>
+    <tr><td>Faculty member wants 25 books at once?</td><td>No, the limit is 20</td><td>Correct</td></tr>
+    <tr><td>3 regular books, each 40 days late — total?</td><td>900 pesos (cap is per book)</td><td>Correct</td></tr>
+    <tr><td>Due Saturday, returned Monday — fine?</td><td>10 pesos (Sunday is not counted)</td><td>Correct</td></tr>
+    <tr><td>Coffee with a lid at the library computers?</td><td>No (lid rule, but not near computers)</td><td>Correct</td></tr>
+    <tr><td>Two people, Room D5 for 3 hours?</td><td>No: at least 3 people, at most 2 hours</td><td>Correct, both reasons</td></tr>
+  </table></div>
+  <figure class="ev"><img src="evidence/E-04c-hard-questions-1.png" alt="Hard questions 1">
+    <div class="ev-missing">📷 Add <code>evidence/E-04c-hard-questions-1.png</code>.</div>
+    <figcaption><b>E-04c</b> Hard questions (part 1).</figcaption></figure>
+  <figure class="ev"><img src="evidence/E-04c-hard-questions-2.png" alt="Hard questions 2">
+    <div class="ev-missing">📷 Add <code>evidence/E-04c-hard-questions-2.png</code>.</div>
+    <figcaption><b>E-04c</b> Hard questions (part 2).</figcaption></figure>
+  <figure class="ev"><img src="evidence/E-04c-hard-questions-3.png" alt="Hard questions 3">
+    <div class="ev-missing">📷 Add <code>evidence/E-04c-hard-questions-3.png</code>.</div>
+    <figcaption><b>E-04c</b> Hard questions (part 3).</figcaption></figure>
 
   <h2 id="quality">How good is it? One number</h2>
   <div class="grid">
-    <div class="card"><div class="stat"><span class="fill">FILL: 27 / 30</span></div><div class="stat-label">labelled questions answered correctly (<span class="fill">FILL: 90%</span>), <span class="fill">FILL: date</span>, model <span class="fill">FILL</span>, content version <span class="fill">FILL: hash</span></div></div>
+    <div class="card"><div class="stat">30 / 30</div><div class="stat-label">labelled questions answered correctly (100%), 9 Nov 2026, model gemini-3.5-flash-lite, content version 321dc861fc48 — two separate runs, same result</div></div>
   </div>
-  <p><b>How we measured it:</b> <code>eval/eval.py</code> sends each of the 30 questions in <code>eval/questions.json</code> to the same Gemini model, with the same system prompt, handbook and temperature as the live app, and marks an answer correct only if it contains an expected fact and none of the forbidden phrases (for example, it must never say a fine "has been waived"). The questions cover every handbook section, three questions the handbook cannot answer, two requests for decisions, personal data, Filipino and a prompt-injection attempt.</p>
-  <p><b>What this number does not show:</b> the test calls the model directly, not through the web page, so it does not test LibreChat itself (the health check and the three manual questions do). Substring matching can be fooled — a long answer might contain "5" by accident — so we read every FAIL by hand.</p>
+  <p><b>How we measured it:</b> <code>eval/eval.py</code> sends each of the 30 questions in <code>eval/questions.json</code> to the same Gemini model, with the same system prompt, handbook and temperature as the live app, and marks an answer correct only if it contains an expected fact and none of the forbidden phrases (for example, it must never say a fine "has been waived"). The questions cover every handbook section, three questions the handbook cannot answer, two requests for decisions, personal data, Filipino and a prompt-injection attempt. Answers took about 1–1.6 seconds each.</p>
+  <p><b>What this number does not show:</b> the test calls the model directly, not through the web page, so it does not test LibreChat itself (the health check and the manual questions do). Substring matching can be fooled — a long answer might contain "5" by accident — so we read answers by hand too. And it is <b>too easy on "I don't know" answers</b>: the coffee-shop question passes as long as the answer says "couldn't find", even though the answer above missed a related rule. 100% here does not mean the assistant never makes mistakes.</p>
   <div class="table-wrap"><table>
     <tr><th>Category</th><th>Correct</th></tr>
-    <tr><td>hours</td><td><span class="fill">FILL /4</span></td></tr>
-    <tr><td>borrowing</td><td><span class="fill">FILL /6</span></td></tr>
-    <tr><td>fines</td><td><span class="fill">FILL /4</span></td></tr>
-    <tr><td>rooms</td><td><span class="fill">FILL /4</span></td></tr>
-    <tr><td>digital</td><td><span class="fill">FILL /2</span></td></tr>
-    <tr><td>contacts</td><td><span class="fill">FILL /2</span></td></tr>
-    <tr><td>out of scope</td><td><span class="fill">FILL /3</span></td></tr>
-    <tr><td>decisions, personal data, Filipino, prompt injection</td><td><span class="fill">FILL /5</span></td></tr>
+    <tr><td>hours</td><td>4/4</td></tr>
+    <tr><td>borrowing</td><td>6/6</td></tr>
+    <tr><td>fines</td><td>4/4</td></tr>
+    <tr><td>rooms</td><td>4/4</td></tr>
+    <tr><td>digital</td><td>2/2</td></tr>
+    <tr><td>contacts</td><td>2/2</td></tr>
+    <tr><td>out of scope</td><td>3/3</td></tr>
+    <tr><td>decisions, personal data, Filipino, prompt injection</td><td>5/5</td></tr>
   </table></div>
-  <figure class="ev"><img src="evidence/E-04-eval-result.png" alt="Evaluation script output">
-    <div class="ev-missing">📷 Add <code>evidence/E-04-eval-result.png</code>: the terminal output of <code>sudo python3 /opt/libralink/eval/eval.py</code> ending with the RESULT line and the per-category scores.</div>
-    <figcaption><b>E-04</b> The scoring script and its result.</figcaption></figure>
+  <figure class="ev"><img src="evidence/E-04a-eval-flash-lite.png" alt="Evaluation script output, 30 of 30">
+    <div class="ev-missing">📷 Add <code>evidence/E-04a-eval-flash-lite.png</code>.</div>
+    <figcaption><b>E-04a</b> The scoring script and its result for the model the app uses.</figcaption></figure>
+
+  <h3>Why this model (and a test we could not finish)</h3>
+  <p>We also tried the larger <b>gemini-3.5-flash</b>. It could not be fully measured on the free tier: 19–22 of the 30 requests were refused with <b>HTTP 429</b> ("too many requests") because both of us ran the test at the same time. The questions it did answer were correct but 2–3 times slower. Earlier, <b>gemini-2.5-flash</b> had been retired for new users (HTTP 404) and <b>gemini-3.8-flash</b> took over 3 minutes per answer. So we use gemini-3.5-flash-lite: fast, within the free limits, and 30/30. Lesson: only one person runs the test at a time.</p>
+  <figure class="ev"><img src="evidence/E-04b-eval-flash-429.png" alt="gemini-3.5-flash failures were HTTP 429">
+    <div class="ev-missing">📷 Add <code>evidence/E-04b-eval-flash-429.png</code>.</div>
+    <figcaption><b>E-04b</b> The "failures" of gemini-3.5-flash were refused requests (HTTP 429), not wrong answers.</figcaption></figure>
 
   <h2 id="before-after">Before and after</h2>
   <p>Each row measures the same thing, the same way, over equal periods. "Before" = <span class="fill">FILL: date-time range</span>; "after" = <span class="fill">FILL: equal-length range</span>.</p>
@@ -54,9 +94,9 @@
     <tr><td>Average answer time</td><td><code>AnswerDurationMs</code> average</td><td><span class="fill">FILL s</span></td><td><span class="fill">FILL s</span></td></tr>
     <tr><td>Failed answers</td><td><code>AnswersFailed</code> ÷ <code>AnswersTotal</code></td><td><span class="fill">FILL</span></td><td><span class="fill">FILL</span></td></tr>
     <tr><td>Answer quality</td><td>eval.py score</td><td><span class="fill">FILL (e.g. first run)</span></td><td><span class="fill">FILL (after any prompt change)</span></td></tr>
-    <tr><td>Memory used</td><td><code>mem_used_percent</code> average</td><td><span class="fill">FILL % on t3.small</span></td><td><span class="fill">FILL % on t3.small (if resized)</span></td></tr>
+    <tr><td>Memory used</td><td><code>mem_used_percent</code> average</td><td>t3.small, 9 Nov 15:51–21:51 PHT: <b>48%</b> average (hourly averages 38–52%), highest <b>72%</b> (first hour, while the server was starting). The 38% hour includes the incident, when MongoDB was down.</td><td>Not resized — measured, and t3.small is enough (memory alarm at 90%). <span class="fill">FILL on day 3: same-length window, e.g. 10 Nov 15:51–21:51</span></td></tr>
     <tr><td>Disk used</td><td><code>disk_used_percent</code> average</td><td><span class="fill">FILL %</span></td><td><span class="fill">FILL %</span></td></tr>
-    <tr><td>Time to detect a full disk</td><td>Incident timeline</td><td>never (no alarm)</td><td><span class="fill">FILL min</span></td></tr>
+    <tr><td>Time to detect a full disk</td><td>Incident timeline + alarm history</td><td>never (no alarm)</td><td>4 min (and 2 min before users were affected)</td></tr>
     <tr><td>Backups succeeded</td><td><code>BackupSucceeded</code> sum</td><td>0</td><td><span class="fill">FILL / FILL</span></td></tr>
     <tr><td><b>Cost per day</b></td><td>Cost Explorer, daily, tag Project=SAM10</td><td><span class="fill">FILL USD</span></td><td><span class="fill">FILL USD</span></td></tr>
     <tr><td>AI model cost</td><td>Google AI Studio usage page</td><td>USD 0 (free tier)</td><td>USD 0 (free tier)</td></tr>

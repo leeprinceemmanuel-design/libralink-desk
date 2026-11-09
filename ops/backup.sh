@@ -15,6 +15,9 @@ ll_load_params config
 key="backups/mongo/LibreChat-$ts.archive.gz"
 
 fail() {
+  # Found during the disk-full incident (2026-11-09): a failed dump still leaves a 0-byte file in S3.
+  # We do NOT give the server permission to delete backups (so an attacker on it cannot either);
+  # instead restore-test.sh skips any backup smaller than 100 bytes.
   ll_log_job backup fail "\"step\":\"$1\",\"seconds\":$(( $(date +%s) - start ))"
   [[ -n "${SNS_TOPIC_ARN:-}" ]] && aws sns publish --region "$region" --topic-arn "$SNS_TOPIC_ARN" \
     --subject "LibraLink backup FAILED ($1)" \

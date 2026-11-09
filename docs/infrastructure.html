@@ -151,8 +151,8 @@
   <h2>Every service, and what it is for</h2>
   <div class="table-wrap"><table>
     <tr><th>Service</th><th>What we run</th><th>Why</th></tr>
-    <tr><td>EC2</td><td><code>libralink-server</code>, Amazon Linux 2023, t3.small (2 GB; the Free plan only allows Free Tier sizes)<span class="fill">FILL (if resized): , later c7i-flex.large</span>, 20 GB gp3 encrypted, IMDSv2 required, Elastic IP</td><td>Runs the three containers. One server is enough for a class-sized load.</td></tr>
-    <tr><td>Docker containers</td><td>nginx 1.27, LibreChat <span class="fill">FILL: exact version from the login page or <code>docker inspect</code></span>, MongoDB 8.0</td><td>LibreChat ships as containers; one <code>docker compose</code> file starts the stack.</td></tr>
+    <tr><td>EC2</td><td><code>libralink-server</code>, Amazon Linux 2023, t3.small (2 GB; the Free plan only allows Free Tier sizes) — measured on 9 Nov (memory 48% average, 72% highest) and kept, 20 GB gp3 encrypted, IMDSv2 required, Elastic IP</td><td>Runs the three containers. One server is enough for a class-sized load.</td></tr>
+    <tr><td>Docker containers</td><td>nginx 1.27, LibreChat v0.8.7, MongoDB 8.0</td><td>LibreChat ships as containers; one <code>docker compose</code> file starts the stack.</td></tr>
     <tr><td>CloudFront</td><td>One distribution, HTTPS only, caching disabled, origin = the Elastic IP's DNS name</td><td>Free HTTPS without buying a domain; hides the server behind AWS's edge.</td></tr>
     <tr><td>S3</td><td><code>libralink-content-&lt;account&gt;</code>: <code>content/</code> (handbook) and <code>backups/</code></td><td>The handbook lives outside the server, versioned; backups survive the server being lost.</td></tr>
     <tr><td>Systems Manager</td><td>Parameter Store (<code>/libralink/config/*</code>, <code>/libralink/secret/*</code>) and Session Manager</td><td>No keys in code; no SSH keys or open SSH port.</td></tr>

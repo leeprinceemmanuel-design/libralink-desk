@@ -18,6 +18,9 @@
     <li><b>Deploy from the repository automatically.</b> A GitHub Actions workflow that, on a push to <code>main</code>, runs Session Manager's <code>send-command</code> to pull the code and restart the app — no more manual updates, and every change is recorded.</li>
     <li><b>Nightly answer-quality check.</b> Run <code>eval.py</code> on 10 of the questions every night and publish the pass rate as a metric with an alarm, so a model change or a broken handbook shows up as a falling score.</li>
     <li><b>Close the last plain-HTTP hop.</b> Have CloudFront add a secret header that nginx checks, or move to an HTTPS origin, so traffic between CloudFront and the server is protected too.</li>
+    <li><b>A deeper health check.</b> During the incident our outside check said "OK" for 17 minutes while users got errors, because <code>/health</code> does not touch the database. Check a page that needs MongoDB instead.</li>
+    <li><b>Better "not in the handbook" answers, and a stricter test for them.</b> Change system-prompt rule 2 so the assistant also mentions any related rule (the coffee-shop question should mention "no food inside"), and make <code>eval.py</code> require that rule instead of accepting any "couldn't find" answer.</li>
+    <li><b>Make alarm e-mails impossible to miss.</b> A mail filter that labels and stars "ALARM:" e-mails (we lost 4 minutes in the incident), or a push notification to our phones.</li>
     <li><b>Switch the server off when nobody uses it.</b> Stop the instance overnight with a scheduled job (and start it in the morning) to cut compute cost by about a third.</li>
   </ol>
 

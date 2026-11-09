@@ -35,34 +35,56 @@
   <h3>Proof they ran on their own</h3>
   <div class="table-wrap"><table>
     <tr><th>Automation</th><th>Unattended run 1</th><th>Unattended run 2</th><th>Run 3+</th></tr>
-    <tr><td>Hourly backup</td><td>2026-11-09 16:05 PHT (08:05:04Z), 6,294 bytes, ok</td><td>2026-11-09 17:05 PHT (09:05:04Z), 14,231 bytes, ok</td><td><span class="fill">FILL: e.g. "48 of 48 succeeded, 10–12 Nov"</span></td></tr>
-    <tr><td>Health check</td><td><span class="fill">FILL: timestamp with "trigger": "schedule"</span></td><td><span class="fill">FILL</span></td><td><span class="fill">FILL</span></td></tr>
+    <tr><td>Hourly backup</td><td>2026-11-09 16:05 PHT (08:05:04Z), 6,294 bytes, ok</td><td>2026-11-09 17:05 PHT (09:05:04Z), 14,231 bytes, ok</td><td>18:05, 19:05, 20:05 ok. 21:05 <b>failed</b> during the incident (disk full) and e-mailed us (<a href="operations.html#monitoring">E-08f</a>). <span class="fill">FILL on day 3: total, e.g. "N of M succeeded, 9–11 Nov"</span></td></tr>
+    <tr><td>Health check</td><td>2026-11-09 17:01 PHT (09:01:31Z), ok, 1.3 s</td><td>2026-11-09 17:16 PHT (09:16:32Z), ok, 1.6 s</td><td>17 of 17 ok from 17:01 to 21:01; 21:16 <b>failed</b> (HTTP 502, during the incident); 21:31 ok again. <span class="fill">FILL on day 3: total</span></td></tr>
   </table></div>
   <figure class="ev"><img src="evidence/E-14-automation-runs.png" alt="Log lines of automation runs with timestamps">
     <div class="ev-missing">📷 Add <code>evidence/E-14-automation-runs.png</code>: CloudWatch Logs showing several <code>"job":"backup","result":"ok"</code> lines with timestamps, and several health-check lines with <code>"trigger":"schedule"</code> (or the E-14 section of <code>bash ops/aws/12-evidence.sh</code>).</div>
     <figcaption><b>E-14</b> Timestamped log lines from runs nobody started by hand.</figcaption></figure>
+  <figure class="ev"><img src="evidence/E-14b-healthcheck-runs.png" alt="Health check runs every 15 minutes">
+    <div class="ev-missing">📷 Add <code>evidence/E-14b-healthcheck-runs.png</code>.</div>
+    <figcaption><b>E-14b</b> Health-check runs, every 15 minutes, all <code>"trigger": "schedule"</code> — including the one failure during the incident.</figcaption></figure>
 
   <h3>How to deploy them</h3>
   <p>Both are in the repository with the rest of the code. The backup is installed by the server's first-boot script (<code>ops/bootstrap-ec2.sh</code>); the health check by running <code>bash ops/aws/10-healthcheck.sh</code> in CloudShell. Full steps: <code>README.md</code> › "Deploying the automations".</p>
 
   <h2 id="incident">2. The incident: the disk filled up (WS-F)</h2>
 
-  <h3>Timeline</h3>
+  <h3>Timeline (9 November 2026)</h3>
   <div class="table-wrap"><table>
     <tr><th>When (PHT)</th><th>What happened</th></tr>
-    <tr><td><span class="fill">FILL</span></td><td><b>Fault starts.</b> We ran <code>ops/fault/fill-disk.sh</code>, which writes one huge file into <code>/var/log/libralink/</code>, the log folder with no rotation — the same thing a runaway debug log would do.</td></tr>
-    <tr><td><span class="fill">FILL</span></td><td>Users' new questions fail: <span class="fill">FILL: what you saw, e.g. "an error appeared instead of an answer"</span>.</td></tr>
-    <tr><td><span class="fill">FILL</span></td><td><b>Noticed:</b> "ALARM: libralink-disk-high" e-mail arrived (<a href="operations.html#monitoring">E-08</a>).</td></tr>
-    <tr><td><span class="fill">FILL</span></td><td>Investigation started with Session Manager (commands below).</td></tr>
-    <tr><td><span class="fill">FILL</span></td><td><b>Fixed:</b> file removed, app restarted, answers working again.</td></tr>
-    <tr><td><span class="fill">FILL</span></td><td><b>Prevented:</b> log rotation and journal cap installed and verified.</td></tr>
+    <tr><td>20:53:46</td><td><b>Fault starts.</b> John ran <code>ops/fault/fill-disk.sh</code>, which writes one huge file into <code>/var/log/libralink/</code>, the log folder with no rotation — the same thing a runaway debug log would do. Disk 43% → 100%, 20 MB left.</td></tr>
+    <tr><td>20:56</td><td>Surprise: <b>the app still answered</b> ("5 books"). Chat messages are only a few KB, so 20 MB was still room. A real runaway log keeps growing, so we let it.</td></tr>
+    <tr><td><b>20:57:44</b></td><td><b>Alarm:</b> <code>libralink-disk-high</code> went to ALARM and e-mailed both of us (<a href="operations.html#monitoring">E-08c</a>).</td></tr>
+    <tr><td>20:59:29</td><td>The log grew into the last 20 MB (60 KB left).</td></tr>
+    <tr><td>20:59:48</td><td><b>MongoDB crashed</b> ("Segmentation fault" in its log). From now on users' new questions fail: the app shows <i>"Something went wrong. Here's the specific error message we encountered: 'An unknown error occurred.'"</i></td></tr>
+    <tr><td>21:01:32</td><td>Alarm: <code>libralink-nginx-5xx</code> (server errors returned to users). This is the e-mail we noticed first.</td></tr>
+    <tr><td>21:01</td><td>The outside health check still said <b>OK</b> — it does not test the database (see "What else we learned").</td></tr>
+    <tr><td>21:03</td><td>Investigation started with Session Manager (commands below).</td></tr>
+    <tr><td>21:05:06</td><td>Side effect: the hourly backup <b>failed</b> (the database was down) and e-mailed us (E-08f).</td></tr>
+    <tr><td>21:16:38</td><td>The health check failed (HTTP 502); its alarm fired at 21:17:56.</td></tr>
+    <tr><td>21:23:22</td><td><b>Fixed:</b> <code>apply-fix.sh</code> removed the file and restarted the app (the fix itself took 9 seconds); answers working again.</td></tr>
+    <tr><td>21:23:28</td><td><b>Prevented:</b> log rotation and journal cap installed and verified with a 120 MB test log.</td></tr>
+    <tr><td>21:24:44</td><td><code>libralink-disk-high</code> back to OK (e-mail E-08e).</td></tr>
   </table></div>
-  <p><b>Time to detect</b> (fault start → alarm): <span class="fill">FILL</span> minutes. <b>Time to fix</b> (alarm → working again): <span class="fill">FILL</span> minutes. Times come from <code>/var/log/libralink/incident-timeline.txt</code> and the alarm history.</p>
+  <p><b>Time to detect</b> (fault start → alarm): <b>4 minutes</b> (20:53:46 → 20:57:44), and the alarm came <b>2 minutes before users were affected</b>. <b>Time to fix</b> (alarm → working again): <b>26 minutes</b> (20:57:44 → 21:23:22); users could not ask questions for about 24 minutes (20:59:48 → 21:23:22). Most of the fix time was investigating, plus 4 minutes lost because we did not spot the first alarm e-mail. Times come from <code>/var/log/libralink/incident-timeline.txt</code>, the CloudWatch alarm history and the container logs.</p>
+  <figure class="ev"><img src="evidence/E-15c-still-working.png" alt="App still answering at 20 MB free">
+    <div class="ev-missing">📷 Add <code>evidence/E-15c-still-working.png</code>.</div>
+    <figcaption><b>E-15c</b> 20:56 — disk at 100% but 20 MB free: still answering.</figcaption></figure>
+  <figure class="ev"><img src="evidence/E-15c-user-error.png" alt="Error shown to the user">
+    <div class="ev-missing">📷 Add <code>evidence/E-15c-user-error.png</code>.</div>
+    <figcaption><b>E-15c</b> ~21:00 — after the last 20 MB filled: what a user saw.</figcaption></figure>
+  <figure class="ev"><img src="evidence/E-15d-alarm-history.png" alt="Alarm history and disk metric">
+    <div class="ev-missing">📷 Add <code>evidence/E-15d-alarm-history.png</code>.</div>
+    <figcaption><b>E-15d</b> CloudWatch: the disk metric jumped from 42.7% to 99.9% at 20:54 and the alarm changed to ALARM at 20:57:44.</figcaption></figure>
 
   <h3>Investigation</h3>
-  <figure class="ev"><img src="evidence/E-15-investigation.png" alt="df, du and logs during the incident">
-    <div class="ev-missing">📷 Add <code>evidence/E-15-investigation.png</code>: Session Manager terminal showing <code>df -h /</code> at 100%, <code>sudo du -ah /var/log | sort -rh | head</code> with debug-trace.log at the top, and <code>docker logs chat-mongodb --tail 20</code> showing the "No space left on device" error (if it appears).</div>
-    <figcaption><b>E-15</b> What the commands showed during the incident.</figcaption></figure>
+  <figure class="ev"><img src="evidence/E-15-investigation-1.png" alt="df and du during the incident">
+    <div class="ev-missing">📷 Add <code>evidence/E-15-investigation-1.png</code>.</div>
+    <figcaption><b>E-15</b> <code>df</code>: 100%, 20 KB free. <code>du</code>: <code>/var/log/libralink/debug-trace.log</code> is 12 GB.</figcaption></figure>
+  <figure class="ev"><img src="evidence/E-15-investigation-2.png" alt="MongoDB crash log and logrotate folder">
+    <div class="ev-missing">📷 Add <code>evidence/E-15-investigation-2.png</code>.</div>
+    <figcaption><b>E-15</b> MongoDB's log: "Got signal: 11 (Segmentation fault)" at 12:59:48 UTC (20:59:48 PHT). <code>docker logs LibreChat</code> could not even be read. <code>/etc/logrotate.d/</code> has no rule for <code>libralink</code>.</figcaption></figure>
   <pre>df -h /                                  # root disk 100% used
 sudo du -ah /var/log | sort -rh | head   # the biggest file: /var/log/libralink/debug-trace.log
 docker logs chat-mongodb --tail 20       # database errors while the disk is full
@@ -70,7 +92,7 @@ docker logs LibreChat --tail 20          # app errors when saving messages
 ls /etc/logrotate.d/                     # no rule for /var/log/libralink</pre>
 
   <h3>Root cause</h3>
-  <p><span class="fill">FILL / confirm after the test:</span> The disk filled because a log file in <code>/var/log/libralink/</code> had <b>no size limit and no rotation</b>, so it grew until the 20 GB disk was full; with no free space MongoDB could not write, so saving new messages failed and users got errors instead of answers. Restarting would not have helped — the full disk would still be full. (We created the oversized file ourselves to simulate a runaway log, as the brief allows.)</p>
+  <p>The disk filled because a log file in <code>/var/log/libralink/</code> had <b>no size limit and no rotation</b>, so it grew to 12 GB until the 20 GB disk was full; with no free space MongoDB crashed (20:59:48), so saving new messages failed and users got errors instead of answers. Restarting would not have helped — the full disk would still be full. (We created the oversized file ourselves to simulate a runaway log, as the brief allows.)</p>
 
   <h3>The change that stops it happening again</h3>
   <ul>
@@ -78,14 +100,25 @@ ls /etc/logrotate.d/                     # no rule for /var/log/libralink</pre>
     <li><b>Journal cap</b>: the system journal may use at most 200 MB.</li>
     <li><b>Earlier warning</b>: the disk alarm checks every minute at 85%, so we hear about it well before 100%.</li>
   </ul>
-  <p><b>Evidence the change worked:</b> <code>ops/fault/verify-fix.sh</code> wrote a 120 MB log on purpose; the rotation cut it back and compressed it (<span class="fill">FILL: size before → after</span>), and the disk alarm stayed OK.</p>
+  <p><b>Evidence the change worked:</b> <code>ops/fault/verify-fix.sh</code> wrote a 120 MB log on purpose; the rotation cut it back and compressed it (120 MB → 0 bytes, plus a 418 KB compressed copy; the whole folder was 668 KB afterwards), and the disk alarm stayed OK.</p>
   <figure class="ev"><img src="evidence/E-15b-prevention.png" alt="verify-fix output showing rotation">
     <div class="ev-missing">📷 Add <code>evidence/E-15b-prevention.png</code>: output of <code>sudo /opt/libralink/ops/fault/verify-fix.sh</code> (sizes before and after, and the timer listing), plus the disk graph on the dashboard showing the spike and the return to normal.</div>
-    <figcaption><b>E-15b</b> The prevention measure tested.</figcaption></figure>
+    <figcaption><b>E-15b</b> The prevention measure tested (21:23:28), the timer that runs it every 15 minutes, and the full incident timeline.</figcaption></figure>
+  <figure class="ev"><img src="evidence/E-15e-working-again.png" alt="App answering again after the fix">
+    <div class="ev-missing">📷 Add <code>evidence/E-15e-working-again.png</code>.</div>
+    <figcaption><b>E-15e</b> After the fix: "5 books" again.</figcaption></figure>
+
+  <h3>What else the incident taught us</h3>
+  <ul>
+    <li><b>The outside health check is too shallow.</b> At 21:01 it said OK while users were getting errors, because <code>/health</code> only asks "is LibreChat running?", not "can it reach the database?". It only failed at 21:16, when the app itself gave up. Next step: check a page that needs the database.</li>
+    <li><b>A failed backup left an empty file in S3</b>, and the restore script would have picked it as "the newest backup". Fixed: <code>restore-test.sh</code> now skips files under 100 bytes (details on <a href="operations.html#backup">Operations</a>).</li>
+    <li><b>The disk alarm was the earliest warning</b> — 2 minutes before any user was affected — but only if someone reads it. We missed it for 4 minutes in a busy inbox.</li>
+    <li><b>At 100% with 20 MB left, nothing visibly broke.</b> The danger is the last few megabytes, which is why the alarm is at 85%, not 100%.</li>
+  </ul>
 
   <h2 id="runbook">3. Runbook: disk full on libralink-server</h2>
   <pre>RUNBOOK: Disk full on libralink-server
-Owner: LibraLink team    Last tested: <span class="fill">FILL date</span>    Takes: ~10 minutes    Ask: <span class="fill">FILL name</span>
+Owner: LibraLink team    Last tested: 2026-11-09    Takes: ~10 minutes    Ask: John Micheal Agustin
 
 1. WHAT THIS IS FOR
    Getting LibraLink Desk working again when the server's root disk is (nearly) full.
@@ -128,11 +161,18 @@ Owner: LibraLink team    Last tested: <span class="fill">FILL date</span>    Tak
    - Restarting alone does not help: the disk is still full.
    - A deleted file that a process still holds open keeps using space (step 3).
    - At 100% disk, Session Manager can be slow to connect; wait and retry.
-   - <span class="fill">FILL: anything that wasted your time during the real test</span>
+   - At 100% disk "docker logs" may fail ("error grabbing logs"). Use df/du and the
+     CloudWatch log groups instead.
+   - MongoDB does not slow down, it CRASHES when the disk is full. Free space first,
+     then restart (step 4).
+   - The first alarm e-mail is easy to miss in a busy inbox: search for "ALARM:".
+   - A backup that ran while the disk was full fails and leaves a 0-byte file in S3.
+     restore-test.sh skips it, but check the next hourly backup succeeds.
+   - The health-check alarm stays red up to 30 minutes after the fix (30-min window).
 
 8. CHANGE HISTORY
-   <span class="fill">FILL date</span> - written after the disk-full incident
-   <span class="fill">FILL date</span> - tested end-to-end during the incident</pre>
+   2026-11-09 - written from the planned fault, before the test
+   2026-11-09 - tested end-to-end during the incident; gotchas added from what happened</pre>
 </main>
 <script src="assets/site.js"></script>
 </body>

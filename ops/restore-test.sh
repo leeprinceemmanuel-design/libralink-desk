@@ -24,7 +24,8 @@ count_docs() {  # $1 = container name
 
 t0=$(date +%s)
 key="${2:-$(aws s3api list-objects-v2 --region "$region" --bucket "$BUCKET" --prefix backups/mongo/ \
-              --query 'sort_by(Contents,&LastModified)[-1].Key' --output text)}"
+              --query 'sort_by(Contents[?Size > `100`],&LastModified)[-1].Key' --output text)}"
+# (Size > 100: skip empty files left by a failed backup - lesson from the disk-full incident.)
 [[ "$key" == "None" || -z "$key" ]] && { echo "No backups found in s3://$BUCKET/backups/mongo/"; exit 1; }
 echo "== Using backup: s3://$BUCKET/$key"
 aws s3 cp "s3://$BUCKET/$key" "$work/restore.archive.gz" --region "$region" --only-show-errors

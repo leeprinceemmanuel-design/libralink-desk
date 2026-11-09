@@ -49,15 +49,37 @@
 
   <figure class="ev"><img src="evidence/E-07-alarms.png" alt="CloudWatch alarms list">
     <div class="ev-missing">📷 Add <code>evidence/E-07-alarms.png</code>: CloudWatch › Alarms › All alarms, filtered by "libralink", showing all 12 and their state.</div>
-    <figcaption><b>E-07</b> The 12 alarms.</figcaption></figure>
+    <figcaption><b>E-07</b> The 12 alarms, all OK on day 1.</figcaption></figure>
+  <figure class="ev"><img src="evidence/E-07b-alarms-after-incident.png" alt="Alarm states and history after the incident">
+    <div class="ev-missing">📷 Add <code>evidence/E-07b-alarms-after-incident.png</code>.</div>
+    <figcaption><b>E-07b</b> Alarm states and state-change history from <code>ops/aws/12-evidence.sh</code> on 9 Nov, after the incident: the disk, 5xx and health-check alarms all changed state at the times on our incident timeline. The health-check alarm was still red here because it looks at the worst result in a 30-minute window, so it clears about 30 minutes after recovery.</figcaption></figure>
 
   <h3>Proof that an alert reached a real person</h3>
   <figure class="ev"><img src="evidence/E-08a-sns-confirmed.png" alt="Both e-mail subscriptions confirmed">
     <div class="ev-missing">📷 Add <code>evidence/E-08a-sns-confirmed.png</code>: the list of SNS subscriptions, both confirmed.</div>
     <figcaption><b>E-08a</b> Both team members confirmed the alert e-mails (9 Nov 2026).</figcaption></figure>
-  <figure class="ev"><img src="evidence/E-08-alert-email.png" alt="Alarm email in the inbox with date and time">
-    <div class="ev-missing">📷 Add <code>evidence/E-08-alert-email.png</code>: the "ALARM: libralink-disk-high" e-mail (from the incident) open in your inbox, with the date and time visible. Blur your e-mail address if you like.</div>
-    <figcaption><b>E-08</b> Alarm e-mail received <span class="fill">FILL: date, time</span> — and what we did about it: see the <a href="automation.html#incident">incident</a>.</figcaption></figure>
+  <figure class="ev"><img src="evidence/E-08-alert-email.png" alt="PII alarm email in the inbox with date and time">
+    <div class="ev-missing">📷 Add <code>evidence/E-08-alert-email.png</code>.</div>
+    <figcaption><b>E-08</b> First real alert: we typed a fake student number and e-mail into the chat at 18:53 on 9 Nov 2026; "ALARM: libralink-pii-detected" reached both inboxes at 18:58 (about 5 minutes).</figcaption></figure>
+  <figure class="ev"><img src="evidence/E-08b-alert-email-john.png" alt="The same alarm in the partner's inbox">
+    <div class="ev-missing">📷 Add <code>evidence/E-08b-alert-email-john.png</code>.</div>
+    <figcaption><b>E-08b</b> The same alert in John's inbox — both of us are really notified.</figcaption></figure>
+  <p>During the <a href="automation.html#incident">disk-full incident</a> the alerts arrived in this order:</p>
+  <div class="grid">
+    <figure class="ev"><img src="evidence/E-08c-disk-alarm-email.png" alt="Disk alarm email at 20:57">
+      <div class="ev-missing">📷 Add <code>evidence/E-08c-disk-alarm-email.png</code>.</div>
+      <figcaption><b>E-08c</b> 20:57 — "ALARM: libralink-disk-high", 4 minutes after the fault started and 2 minutes before users saw errors.</figcaption></figure>
+    <figure class="ev"><img src="evidence/E-08d-5xx-alarm-email.png" alt="Server errors alarm email at 21:01">
+      <div class="ev-missing">📷 Add <code>evidence/E-08d-5xx-alarm-email.png</code>.</div>
+      <figcaption><b>E-08d</b> 21:01 — "ALARM: libralink-nginx-5xx": users were getting server errors.</figcaption></figure>
+    <figure class="ev"><img src="evidence/E-08f-backup-failed-email.png" alt="Backup failed email at 21:05">
+      <div class="ev-missing">📷 Add <code>evidence/E-08f-backup-failed-email.png</code>.</div>
+      <figcaption><b>E-08f</b> 21:05 — "LibraLink backup FAILED (mongodump)": the backup automation reporting its own failure.</figcaption></figure>
+    <figure class="ev"><img src="evidence/E-08e-disk-ok-email.png" alt="Disk alarm back to OK at 21:24">
+      <div class="ev-missing">📷 Add <code>evidence/E-08e-disk-ok-email.png</code>.</div>
+      <figcaption><b>E-08e</b> 21:24 — "OK: libralink-disk-high", 82 seconds after the fix.</figcaption></figure>
+  </div>
+  <p><b>Honest note:</b> the disk alarm e-mail arrived at 20:57, but in a busy inbox we first noticed the 5xx e-mail at 21:01. A Gmail filter that labels and stars every "ALARM:" e-mail from AWS Notifications is now on our to-do list.</p>
 
   <h3>Request log</h3>
   <figure class="ev"><img src="evidence/E-09-request-log.png" alt="Request log lines in CloudWatch Logs">
@@ -84,18 +106,25 @@
   <h3>Backup settings</h3>
   <figure class="ev"><img src="evidence/E-10-backups-s3.png" alt="Hourly backup files in S3 and versioning enabled">
     <div class="ev-missing">📷 Add <code>evidence/E-10-backups-s3.png</code>: S3 › libralink-content-… › backups/mongo/ listing several hourly files, plus the bucket's Properties showing Bucket Versioning: Enabled (or the output of <code>bash ops/aws/12-evidence.sh</code>, section E-10).</div>
-    <figcaption><b>E-10</b> Hourly database dumps in S3, versioning enabled, lifecycle rule deleting backups after 8 days.</figcaption></figure>
+    <figcaption><b>E-10</b> Hourly database dumps in S3 on 9 Nov (16:05 to 20:05 PHT, plus a manual one at 20:33 before the restore test); the files grow from 6.1 KB to 25.7 KB as we used the system.</figcaption></figure>
+  <figure class="ev"><img src="evidence/E-10b-versioning.png" alt="Bucket versioning enabled">
+    <div class="ev-missing">📷 Add <code>evidence/E-10b-versioning.png</code>.</div>
+    <figcaption><b>E-10b</b> Bucket Versioning: Enabled. A lifecycle rule deletes backups after 8 days, so 7 full days are kept.</figcaption></figure>
   <p>Why not RDS automated backups? LibreChat needs MongoDB, which RDS does not run, so the brief's alternative applies: "a scheduled dump to S3 kept for at least 7 days". Deletion protection's equivalent here is S3 versioning (a deleted backup can be recovered) and the instance role, which can write backups but cannot delete them.</p>
+  <div class="note"><b>A bug the incident found:</b> when the 21:05 backup failed during the disk-full incident, it still left an <b>empty (0-byte) file</b> in S3, and our restore script always picked the newest file. If we had needed to restore between 21:05 and 22:05, we would have restored nothing. Because the server is deliberately <i>not</i> allowed to delete backups, we fixed the other side: <code>restore-test.sh</code> now skips any backup smaller than 100 bytes.</div>
 
   <h3>The restore test</h3>
-  <p>On <span class="fill">FILL: date, time</span> we ran <code>sudo /opt/libralink/ops/restore-test.sh full</code>. It stopped the app, moved the live database aside, started an <b>empty</b> database, restored the newest backup from S3 (<code><span class="fill">FILL: file name</span></code>), and started the app again. We then logged in and our earlier conversations were there.</p>
+  <p>On 9 November 2026 at 20:34 PHT we ran <code>sudo /opt/libralink/ops/restore-test.sh full</code>. It stopped the app, moved the live database aside, started an <b>empty</b> database, restored the newest backup from S3 (<code>backups/mongo/LibreChat-20261109T123312Z.archive.gz</code>, taken by hand at 20:33 so the newest chats were included), and started the app again. We then logged in and our earlier conversations were there, also after refreshing the page. First we did a safe practice run (<code>restore-test.sh side</code>) into a throw-away database: same counts, 11 seconds. While the app was stopped, the <code>libralink-nginx-5xx</code> alarm fired (20:35) — a real side effect of a restore.</p>
   <figure class="ev"><img src="evidence/E-11-restore.png" alt="Restore test output with document counts and timing">
     <div class="ev-missing">📷 Add <code>evidence/E-11-restore.png</code>: the terminal output of the restore test (counts before, empty, after, and the total seconds) AND a screenshot of the app after logging in showing old conversations in the sidebar.</div>
-    <figcaption><b>E-11</b> Counts before: <span class="fill">FILL users/conversations/messages</span>; after restore: <span class="fill">FILL</span>. Total time <span class="fill">FILL</span> s.</figcaption></figure>
+    <figcaption><b>E-11</b> Counts before: 3 users / 8 conversations / 61 messages; empty database: 0 / 0 / 0; after restore: 3 / 8 / 61. Total time 30 s.</figcaption></figure>
+  <figure class="ev"><img src="evidence/E-11b-restore-app.png" alt="Old conversations visible after the restore">
+    <div class="ev-missing">📷 Add <code>evidence/E-11b-restore-app.png</code>.</div>
+    <figcaption><b>E-11b</b> After the restore and a page refresh, the old conversations are back in the sidebar.</figcaption></figure>
 
   <h3>How much we could lose, and how long it takes</h3>
   <p><b>RPO (how much we would lose):</b> up to 1 hour of conversations, because the database is backed up every hour; the handbook and settings, almost nothing, because S3 and Parameter Store keep versions.
-  <b>RTO (how long until it works again):</b> <span class="fill">FILL: N</span> minutes measured for a database restore on a running server; rebuilding a lost server from our scripts adds about <span class="fill">FILL: 10–15</span> minutes.</p>
+  <b>RTO (how long until it works again):</b> 30 seconds measured for a database restore on a running server; rebuilding a lost server from our scripts adds about <span class="fill">FILL: 10–15</span> minutes.</p>
 
   <h2 id="security">3. Security (WS-D)</h2>
 
@@ -150,6 +179,9 @@
     <figure class="ev"><img src="evidence/E-12c-john-mfa.png" alt="MFA device on John Micheal Agustin's login">
       <div class="ev-missing">📷 Add <code>evidence/E-12c-john-mfa.png</code>: the MFA devices box of John's AWS login.</div>
       <figcaption><b>E-12c</b> MFA on John Micheal Agustin's login.</figcaption></figure>
+    <figure class="ev"><img src="evidence/E-12d-no-iam-users.png" alt="No IAM users, only machine roles">
+      <div class="ev-missing">📷 Add <code>evidence/E-12d-no-iam-users.png</code>.</div>
+      <figcaption><b>E-12d</b> From <code>ops/aws/12-evidence.sh</code>: no IAM users at all (so no passwords or access keys to leak), only two roles for machines (<code>libralink-ec2-role</code>, <code>libralink-healthcheck-role</code>), and Parameter Store names with every secret as a SecureString.</figcaption></figure>
     </div>
     <figure class="ev"><img src="evidence/E-13-parameter-store.png" alt="Parameter Store list of names">
       <div class="ev-missing">📷 Add <code>evidence/E-13-parameter-store.png</code>: Systems Manager › Parameter Store list (names and types only — NEVER click "Show" on a SecureString value).</div>

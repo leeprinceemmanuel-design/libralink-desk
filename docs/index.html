@@ -16,9 +16,9 @@
 
   <div class="grid">
     <div class="card"><div class="stat">Live</div><div class="stat-label">at <a href="https://d2g0ygnhaomokh.cloudfront.net">https://d2g0ygnhaomokh.cloudfront.net</a> (HTTPS)</div></div>
-    <div class="card"><div class="stat"><span class="fill">FILL: 27/30</span></div><div class="stat-label">test questions answered correctly (<a href="results.html#quality">how we measured</a>)</div></div>
+    <div class="card"><div class="stat">30/30</div><div class="stat-label">test questions answered correctly (<a href="results.html#quality">how we measured</a>)</div></div>
     <div class="card"><div class="stat">12</div><div class="stat-label">alarms that e-mail both of us (<a href="operations.html#monitoring">monitoring</a>)</div></div>
-    <div class="card"><div class="stat">Hourly</div><div class="stat-label">backups, restore tested in <span class="fill">FILL: N</span> minutes (<a href="operations.html#backup">backup</a>)</div></div>
+    <div class="card"><div class="stat">Hourly</div><div class="stat-label">backups, restore tested in 30 seconds (<a href="operations.html#backup">backup</a>)</div></div>
   </div>
 
   <h2>Presentation video</h2>
@@ -43,7 +43,7 @@
     <li><b>We can see it working:</b> a dashboard and 12 alarms, including ones that notice when the system is "up but useless" (failed, empty or "not found" answers).</li>
     <li><b>We can get it back:</b> the database is backed up to S3 every hour and we actually restored it and logged back in.</li>
     <li><b>Less manual work:</b> backups and an outside health check run on their own.</li>
-    <li><b>We broke it on purpose and fixed it for good:</b> we filled the disk, watched the alarm fire, found the cause (a log file with no size limit) and added log rotation so it cannot happen the same way again.</li>
+    <li><b>We broke it on purpose and fixed it for good:</b> we filled the disk, the alarm warned us 4 minutes later (2 minutes before users noticed), we found the cause (a log file with no size limit) and added log rotation so it cannot happen the same way again. The test also uncovered two hidden problems, which we fixed or listed as next steps.</li>
   </ul>
 
   <h3>What improved</h3>
@@ -54,8 +54,8 @@
   <h2>Team</h2>
   <div class="table-wrap"><table>
     <tr><th>Name</th><th>Main role</th><th>Presents in the video</th></tr>
-    <tr><td>Prince Emmanuel C. Lee</td><td><span class="fill">FILL: e.g. AI and integration engineer (base system, reskin, AWS wiring)</span></td><td><span class="fill">FILL: sections</span></td></tr>
-    <tr><td>John Micheal Agustin</td><td><span class="fill">FILL: e.g. reliability engineer (dashboard, alarms, backups, automation, incident)</span></td><td><span class="fill">FILL: sections</span></td></tr>
+    <tr><td>Prince Emmanuel C. Lee</td><td>Deployment and AWS engineer (base system, reskin, AWS build, security, website)</td><td><span class="fill">FILL: sections</span></td></tr>
+    <tr><td>John Micheal Agustin</td><td>Reliability and testing engineer (server checks, restore test, incident, testing)</td><td><span class="fill">FILL: sections</span></td></tr>
   </table></div>
   <p>Shared: deployment, security and this website. Day-by-day contribution log: <a href="https://github.com/leeprinceemmanuel-design/libralink-desk#contribution-log">README.md</a> .</p>
 </main>
