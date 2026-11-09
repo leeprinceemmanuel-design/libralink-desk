@@ -71,7 +71,9 @@ Runs are logged as JSON lines with timestamps in CloudWatch (`/libralink/automat
 # handbook changed:   (CloudShell)
 bash ops/aws/03-s3.sh
 # code or config changed: (server, Session Manager)
-cd /opt/libralink && sudo git pull && sudo systemctl restart libralink
+cd /opt/libralink && sudo git pull && sudo bash ops/update-server.sh
+# only if files under app/ changed:
+sudo systemctl restart libralink
 ```
 
 ## Secrets
@@ -87,7 +89,7 @@ Who did what, day by day (evidence for the 15% individual mark). Keep this hones
 | Day / date | Prince Emmanuel C. Lee | John Micheal Agustin |
 |---|---|---|
 | Day 1 — 8–9 Nov 2026 | Read the brief; ran the original LibreChat locally (E-05); set up the GitHub repo and Pages site; created the AWS account, MFA and budget alert; tested the Free-plan limits and moved the project to Sydney; deployed the server, HTTPS (CloudFront) and lock-down; switched the AI model when Google retired the old one; set up monitoring, alarms, the health check and CloudTrail | Chose the project approach with Lee (Team logins); joined the AWS account through the Team page and set up his own MFA (E-12c); confirmed the alert e-mail subscription; reviewed the plan for Day 2 |
-| Day 2 — FILL date | FILL | FILL |
+| Day 2 — 9 Nov 2026 | Manual testing (20 + 7 hard questions), found the wrong answer, quality test 30/30, checked restored chats, S3 + alarm-email + CloudWatch evidence during the incident, security evidence script | Server health check, quality test run, restore test (30 s), fault injection, investigation, fix + prevention, fixed the backup permission bug |
 | Day 3 — FILL date | FILL | FILL |
 
 Roles: Prince Emmanuel C. Lee — deployment and AWS engineer (server, HTTPS, security, monitoring).

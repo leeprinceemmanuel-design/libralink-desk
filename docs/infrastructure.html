@@ -163,7 +163,7 @@
     <tr><td>Not used (and why)</td><td>RDS, load balancer, Kubernetes, a second region</td><td>LibreChat's database is MongoDB, which RDS does not run; one server needs no load balancer. Keeping it small is a brief requirement.</td></tr>
   </table></div>
 
-  <div class="note"><b>Change log of this design.</b> v1 (<span class="fill">FILL: date</span>): first deployment, port 80 open to everyone (baseline). v2 (<span class="fill">FILL: date</span>): CloudFront HTTPS added, port 80 limited to CloudFront. v3 (<span class="fill">FILL: date</span>): log rotation added after the disk-full incident<span class="fill">FILL (if done): , instance resized to t3.small</span>.</div>
+  <div class="note"><b>Change log of this design.</b> v1 (9 Nov 2026): first deployment, port 80 open to everyone (baseline). v2 (9 Nov 2026): CloudFront HTTPS added, port 80 limited to CloudFront. v3 (9 Nov 2026, evening): log rotation and a journal cap added after the disk-full incident; the restore script skips empty backups; services start scripts through bash and the server is updated only with <code>ops/update-server.sh</code>. Instance size measured and kept at t3.small.</div>
 </main>
 <script src="assets/site.js"></script>
 </body>

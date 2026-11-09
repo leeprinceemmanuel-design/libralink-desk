@@ -79,10 +79,10 @@
 
   <h3>6. How good it is</h3>
   <ul>
-    <li><b>The one number:</b> <span class="fill">FILL: e.g. 27 of 30 test questions correct (90%)</span> on <span class="fill">FILL: date</span>.</li>
+    <li><b>The one number:</b> 30 of 30 test questions correct (100%) on 9 November 2026 (model gemini-3.5-flash-lite, two runs, same result).</li>
     <li><b>How we measured it:</b> <code>eval/eval.py</code> sends each of our 30 labelled questions to the same model, with the same prompt and handbook the app uses, and checks the answer for the expected facts (and for things it must not say). See <a href="results.html#quality">Results</a>.</li>
     <li><b>What the cases cover:</b> all six handbook sections (22), questions the handbook cannot answer (3), requests for decisions (2), personal data (1), Filipino (1) and a prompt-injection attempt (1).</li>
-    <li><b>An example it gets wrong:</b> <span class="fill">FILL: copy a real FAIL line from the eval CSV, e.g. the question, what it said, and why that is wrong.</span></li>
+    <li><b>An example it gets wrong:</b> the scoring script found no failure, so we looked by hand. Asked "Does the library have a coffee shop inside?", it answered "I couldn't find that in the LibraLink handbook. You can reach out to the Library Director's Office for assistance with this." That is partly wrong: it missed the related rule "No food inside the library", and the Director's Office handles complaints, not general questions. The scoring script still counted it as correct, because it only checks for "couldn't find" — a weakness of our test, too (<a href="results.html#tests">details</a>).</li>
   </ul>
 
   <h3>7. How it is served</h3>

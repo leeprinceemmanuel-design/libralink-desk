@@ -15,7 +15,7 @@
 
   <div class="note"><b>Our deliberate trade-off.</b> We optimised for <b>Security</b> and <b>Operational Excellence</b>. We accepted a weaker <b>Reliability</b> design: one EC2 instance in one Availability Zone, with MongoDB on the same server. A second server, a load balancer and a managed database would roughly double the cost and the moving parts for a class-sized assistant. We cover the risk with hourly backups and a restore we have actually timed.</div>
 
-  <h2>Pass 1 — first working deployment (<span class="fill">FILL: date</span>)</h2>
+  <h2>Pass 1 — first working deployment (9 November 2026)</h2>
   <div class="table-wrap"><table>
     <tr><th>Pillar</th><th>What our setup did at that point</th><th>Verdict</th><th>So we built next…</th></tr>
     <tr><td>Operational Excellence</td><td>Started by a script and systemd; no dashboards, alarms or runbooks.</td><td><span class="verdict v-gap">gap</span></td><td>Dashboard, alarms, request logging, runbook.</td></tr>
@@ -26,7 +26,7 @@
     <tr><td>Sustainability</td><td>One small instance, model hosted by the provider, no idle extras.</td><td><span class="verdict v-good">good</span></td><td>—</td></tr>
   </table></div>
 
-  <h2>Pass 2 — after the incident (<span class="fill">FILL: date</span>)</h2>
+  <h2>Pass 2 — after the incident (9 November 2026, evening)</h2>
 
   <h3>Operational Excellence — <span class="verdict v-good">good</span></h3>
   <p><b>The framework asks:</b> run and monitor the workload, automate changes, learn from failures. <b>We do:</b> a dashboard and 12 alarms e-mailing both of us; every answer logged with its timing, result and version; two automations running unattended; a real incident with root cause, prevention and a runbook. <b>Still weak:</b> code changes reach the server by a manual <code>git pull</code> and restart, not automatic deployment.</p>
@@ -58,7 +58,7 @@
   </table></div>
 
   <h2>The one gap we would fix first</h2>
-  <p><b>Reliability: the single server.</b> Everything else on this page is "good enough" for a class project, but if our one instance or its Availability Zone fails, users get nothing until we rebuild — about <span class="fill">FILL: RTO</span> minutes plus launching a new server. The first fix is cheap: an EC2 Auto Scaling group of one instance with a launch template that runs our bootstrap script, so a dead server is replaced automatically; MongoDB data would move to a separate EBS volume with snapshots (or to a managed MongoDB-compatible database). That turns "we restore by hand" into "it heals itself".</p>
+  <p><b>Reliability: the single server.</b> Everything else on this page is "good enough" for a class project, but if our one instance or its Availability Zone fails, users get nothing until we rebuild — 30 seconds to restore the database (measured) plus launching and setting up a new server, which we have not timed end to end. The first fix is cheap: an EC2 Auto Scaling group of one instance with a launch template that runs our bootstrap script, so a dead server is replaced automatically; MongoDB data would move to a separate EBS volume with snapshots (or to a managed MongoDB-compatible database). That turns "we restore by hand" into "it heals itself".</p>
 
   <p class="stat-label"><span class="fill">FILL (optional, same credit): link to the report from the free AWS Well-Architected Tool if you also record these answers there.</span></p>
 </main>

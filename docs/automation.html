@@ -66,6 +66,7 @@
     <tr><td>21:23:22</td><td><b>Fixed:</b> <code>apply-fix.sh</code> removed the file and restarted the app (the fix itself took 9 seconds); answers working again.</td></tr>
     <tr><td>21:23:28</td><td><b>Prevented:</b> log rotation and journal cap installed and verified with a 120 MB test log.</td></tr>
     <tr><td>21:24:44</td><td><code>libralink-disk-high</code> back to OK (e-mail E-08e).</td></tr>
+    <tr><td>21:47:56</td><td><code>libralink-healthcheck-failed</code> back to OK, 30 minutes after it fired (its 30-minute window).</td></tr>
   </table></div>
   <p><b>Time to detect</b> (fault start → alarm): <b>4 minutes</b> (20:53:46 → 20:57:44), and the alarm came <b>2 minutes before users were affected</b>. <b>Time to fix</b> (alarm → working again): <b>26 minutes</b> (20:57:44 → 21:23:22); users could not ask questions for about 24 minutes (20:59:48 → 21:23:22). Most of the fix time was investigating, plus 4 minutes lost because we did not spot the first alarm e-mail. Times come from <code>/var/log/libralink/incident-timeline.txt</code>, the CloudWatch alarm history and the container logs.</p>
   <figure class="ev"><img src="evidence/E-15c-still-working.png" alt="App still answering at 20 MB free">
@@ -107,6 +108,9 @@ ls /etc/logrotate.d/                     # no rule for /var/log/libralink</pre>
   <figure class="ev"><img src="evidence/E-15e-working-again.png" alt="App answering again after the fix">
     <div class="ev-missing">📷 Add <code>evidence/E-15e-working-again.png</code>.</div>
     <figcaption><b>E-15e</b> After the fix: "5 books" again.</figcaption></figure>
+  <figure class="ev"><img src="evidence/E-08g-healthcheck-ok-email.png" alt="Health check alarm back to OK">
+    <div class="ev-missing">📷 Add <code>evidence/E-08g-healthcheck-ok-email.png</code>.</div>
+    <figcaption><b>E-08g</b> 21:47 — "OK: libralink-healthcheck-failed": the outside check agrees the site is healthy again.</figcaption></figure>
 
   <h3>What else the incident taught us</h3>
   <ul>
@@ -115,6 +119,18 @@ ls /etc/logrotate.d/                     # no rule for /var/log/libralink</pre>
     <li><b>The disk alarm was the earliest warning</b> — 2 minutes before any user was affected — but only if someone reads it. We missed it for 4 minutes in a busy inbox.</li>
     <li><b>At 100% with 20 MB left, nothing visibly broke.</b> The danger is the last few megabytes, which is why the alarm is at 85%, not 100%.</li>
   </ul>
+
+  <h2 id="incident2">A second, smaller incident we caused ourselves</h2>
+  <p>At about 22:00 we updated the server with a plain <code>git pull</code> to install the restore fix. Our repository is edited on Windows, which does not keep Linux's "executable" mark on files, so the pull replaced <code>ops/backup.sh</code> <b>without</b> it. At 22:05 systemd could not start the backup at all: <i>"Failed to locate executable /opt/libralink/ops/backup.sh: Permission denied"</i>.</p>
+  <ul>
+    <li><b>Why no e-mail came:</b> the "backup FAILED" e-mail is sent by the backup script itself. The script never started, so it could not report anything. We found it at 22:09 because we checked the log by hand.</li>
+    <li><b>What would have caught it:</b> the outside alarm <code>libralink-backup-missing</code> (no good backup in 2 hours) — this is exactly why a job should be watched from outside, not only by itself.</li>
+    <li><b>Fix:</b> made the scripts runnable again and ran a backup by hand at 22:12 (ok, 30,878 bytes).</li>
+    <li><b>Prevention:</b> the systemd services now start the scripts with <code>/bin/bash</code>, so the mark no longer matters, and the server is only updated with <code>sudo bash ops/update-server.sh</code>, which pulls, restores the marks and reinstalls the services. We ran it twice to check it is safe to repeat.</li>
+  </ul>
+  <figure class="ev"><img src="evidence/E-14c-backup-permission-fix.png" alt="Permission denied, then the fix and a successful backup">
+    <div class="ev-missing">📷 Add <code>evidence/E-14c-backup-permission-fix.png</code>.</div>
+    <figcaption><b>E-14c</b> The 22:05 backup failing with "Permission denied", the fix, and the 22:12 backup succeeding.</figcaption></figure>
 
   <h2 id="runbook">3. Runbook: disk full on libralink-server</h2>
   <pre>RUNBOOK: Disk full on libralink-server

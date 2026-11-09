@@ -124,7 +124,7 @@
 
   <h3>How much we could lose, and how long it takes</h3>
   <p><b>RPO (how much we would lose):</b> up to 1 hour of conversations, because the database is backed up every hour; the handbook and settings, almost nothing, because S3 and Parameter Store keep versions.
-  <b>RTO (how long until it works again):</b> 30 seconds measured for a database restore on a running server; rebuilding a lost server from our scripts adds about <span class="fill">FILL: 10–15</span> minutes.</p>
+  <b>RTO (how long until it works again):</b> 30 seconds measured for a database restore on a running server; rebuilding a lost server from our scripts (<code>06-ec2.sh</code> + first-boot script) takes longer; we have not timed that end to end, so we do not claim a number.</p>
 
   <h2 id="security">3. Security (WS-D)</h2>
 
