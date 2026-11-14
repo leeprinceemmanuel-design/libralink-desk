@@ -47,15 +47,15 @@
   </ul>
 
   <h3>What improved</h3>
-  <p><span class="fill">FILL after measuring (see Results): e.g. "Time to detect a full disk went from 'never' to 4 minutes; 100% of hourly backups succeeded over 2 days; average answer time 3.1 s; cost per day went from $X to $Y after right-sizing."</span></p>
+  <p>Measured on our own account, 9–14 November 2026: a full disk is now detected in <b>4 minutes</b> (before: never); the site was up for <b>99.8%</b> of 473 outside checks (the one failure was our own test); <b>118 of 120</b> hourly backups succeeded and a restore takes <b>30 seconds</b>; the assistant scored <b>30/30</b> on day 1 and again on day 5, answering in <b>2.4 s</b> on average; and all of this costs <b>USD 0.002 a day</b> more than the bare server (USD 0.82 a day in total). See <a href="results.html">Results</a>.</p>
 
   <div class="note"><b>Trade-off we chose:</b> we optimised for <b>Security</b> and <b>Operational Excellence</b> and deliberately accepted a weaker <b>Reliability</b> design — one server in one Availability Zone, so if that zone fails the service is down until we rebuild it from backups. For a class-sized library assistant, that is cheaper and simpler, and our tested restore keeps the damage small. See the <a href="well-architected.html">Well-Architected review</a>.</div>
 
   <h2>Team</h2>
   <div class="table-wrap"><table>
     <tr><th>Name</th><th>Main role</th><th>Presents in the video</th></tr>
-    <tr><td>Prince Emmanuel C. Lee</td><td>Deployment and AWS engineer (base system, reskin, AWS build, security, website)</td><td><span class="fill">FILL: sections</span></td></tr>
-    <tr><td>John Micheal Agustin</td><td>Reliability and testing engineer (server checks, restore test, incident, testing)</td><td><span class="fill">FILL: sections</span></td></tr>
+    <tr><td>Prince Emmanuel C. Lee</td><td>Deployment and AWS engineer (base system, reskin, AWS build, security, website)</td><td>Intro, the reskin and a live question, where it runs, security, results</td></tr>
+    <tr><td>John Micheal Agustin</td><td>Reliability and testing engineer (server checks, restore test, incident, testing)</td><td>Monitoring, backup and restore, the incident, results</td></tr>
   </table></div>
   <p>Shared: deployment, security and this website. Day-by-day contribution log: <a href="https://github.com/leeprinceemmanuel-design/libralink-desk#contribution-log">README.md</a> .</p>
 </main>

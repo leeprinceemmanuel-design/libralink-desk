@@ -14,7 +14,7 @@
   </div>
 
   <h2>When and how we recorded it</h2>
-  <p>Baseline taken on <span class="fill">FILL: date and time</span>, at two moments: (1) stock LibreChat running on our laptop with no changes, and (2) the first AWS deployment straight after <code>ops/aws/06-ec2.sh</code>, before HTTPS, lock-down, monitoring or backups were added.</p>
+  <p>Baseline taken at two moments: (1) stock LibreChat running on our laptop with no changes, on day 1 of the build, and (2) the first AWS deployment straight after <code>ops/aws/06-ec2.sh</code>, before HTTPS, lock-down, monitoring or backups were added — on 9 November 2026 between 15:38 PHT (server started) and 16:18 PHT (port 80 closed to the world), times taken from CloudTrail.</p>
 
   <h2>What we found</h2>
   <div class="table-wrap"><table>
@@ -26,7 +26,7 @@
     <tr><td>Monitoring</td><td>Only the default EC2 metrics (CPU, network). No memory or disk metrics, no alarms, no dashboard, no application logs in CloudWatch.</td><td>A crash or full disk would go unnoticed until a user complained.</td></tr>
     <tr><td>Backups</td><td>None. The database lives only on the server's disk.</td><td>Losing the server means losing every account and conversation.</td></tr>
     <tr><td>Logs</td><td>Log files under <code>/var/log/libralink</code> with no size limit or rotation.</td><td>A runaway log can fill the disk (this became our incident).</td></tr>
-    <tr><td>Cost</td><td><span class="fill">FILL: instance type and the daily cost from Cost Explorer for the first full day</span>; a USD <span class="fill">FILL: 10</span> budget alert was set before anything else (day 1, step 1).</td><td>Brief section 6: set a budget alert on day one.</td></tr>
+    <tr><td>Cost</td><td>one t3.small server; USD 0.82 on the first full day (10 Nov, Cost Explorer); a USD 10 monthly budget alert was set before anything else (day 1, step 1) — but, as we found on 14 Nov, it counted the free credits and its e-mails were never verified, so it could not have warned us (see <a href="results.html">Results</a>).</td><td>Brief section 6: set a budget alert on day one.</td></tr>
   </table></div>
 
   <h2>Baseline evidence</h2>
@@ -47,10 +47,10 @@
     <tr><th>Measure</th><th>Baseline value</th><th>Period</th></tr>
     <tr><td>Alarms / time to detect a full disk</td><td>0 alarms / never</td><td>—</td></tr>
     <tr><td>Backups / restore tested</td><td>0 / no</td><td>—</td></tr>
-    <tr><td>Answer quality</td><td>Stock LibreChat had no library knowledge: <span class="fill">FILL: optional — ask 3 handbook questions on the stock app and count correct</span></td><td><span class="fill">FILL</span></td></tr>
-    <tr><td>Average answer time</td><td><span class="fill">FILL from the dashboard</span></td><td><span class="fill">FILL: date range</span></td></tr>
+    <tr><td>Answer quality</td><td>Stock LibreChat had no library knowledge: not measured (it had no handbook, so it could not know our invented rules)</td><td>—</td></tr>
+    <tr><td>Average answer time</td><td>not measured (no request log existed yet)</td><td>—</td></tr>
     <tr><td>Memory used on t3.small</td><td>50.6% average, 71.9% highest</td><td>9 Nov 2026, 15:51–16:51 PHT (first hour after start-up)</td></tr>
-    <tr><td>Cost per day</td><td><span class="fill">FILL: USD</span></td><td><span class="fill">FILL: date</span></td></tr>
+    <tr><td>Cost per day</td><td>USD 0.818 (server, public IP and disk only)</td><td>those three lines on 10 Nov 2026</td></tr>
   </table></div>
 </main>
 <script src="assets/site.js"></script>

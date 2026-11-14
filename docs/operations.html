@@ -18,7 +18,7 @@
   <h3>The dashboard</h3>
   <figure class="ev"><img src="evidence/E-06-dashboard.png" alt="CloudWatch dashboard libralink-ops with real data">
     <div class="ev-missing">📷 Add <code>evidence/E-06-dashboard.png</code>: CloudWatch › Dashboards › libralink-ops, time range 1 day or 3 days, with real data in the graphs (ask the assistant some questions first).</div>
-    <figcaption><b>E-06</b> Dashboard <code>libralink-ops</code>: requests and answers, errors, answer time, CPU, disk and memory, health check, backup size, "not in handbook" answers, and all alarms. Range: <span class="fill">FILL: dates</span>.</figcaption></figure>
+    <figcaption><b>E-06</b> Dashboard <code>libralink-ops</code>: requests and answers, errors, answer time, CPU, disk and memory, health check, backup size, "not in handbook" answers, and all alarms. Range: 9 Nov 08:00 → 14 Nov 08:00 PHT (five days, including the incident on 9 Nov evening). All 12 alarms green.</figcaption></figure>
 
   <h3>Where the numbers come from</h3>
   <ul>
@@ -39,13 +39,13 @@
     <tr><td>libralink-answers-failed-rate</td><td>&gt; 5% of answers failed in 15 min</td><td>Brief's value; catches "up but not working" (e.g. a bad API key).</td></tr>
     <tr><td>libralink-empty-answer</td><td>Any empty answer in 30 min</td><td>Brief's value; an empty answer is never correct.</td></tr>
     <tr><td>libralink-notfound-spike</td><td>&gt; 50% "not in the handbook" answers in 30 min (min. 4 answers)</td><td>If the handbook did not load, almost every answer becomes "not found".</td></tr>
-    <tr><td>libralink-slow-answers</td><td>Average answer time &gt; 20 s over 15 min</td><td>We changed the brief's 3 s: AI answers stream for several seconds, so 3 s would fire all the time. <span class="fill">FILL: our measured normal average was N s.</span></td></tr>
+    <tr><td>libralink-slow-answers</td><td>Average answer time &gt; 20 s over 15 min</td><td>We changed the brief's 3 s: AI answers stream for several seconds, so 3 s would fire all the time. Our measured normal average is 2.4 s (9 and 14 Nov), slowest 7.3 s.</td></tr>
     <tr><td>libralink-nginx-5xx</td><td>Any HTTP 5xx in 5 min</td><td>Replaces the load-balancer 5xx alarm (we have no load balancer).</td></tr>
     <tr><td>libralink-healthcheck-failed</td><td>Health check failed, or did not run, in 30 min</td><td>Two missed checks in a row — the site is down for users.</td></tr>
     <tr><td>libralink-backup-missing</td><td>No successful backup in 2 hours</td><td>Backups run hourly, so two missing hours means the automation broke.</td></tr>
     <tr><td>libralink-pii-detected</td><td>A question looked like it held personal data</td><td>Our responsible-use check (WS-D item 4).</td></tr>
   </table></div>
-  <p>The billing alarm from the brief's starter set is covered by our AWS Budgets alert (set on day 1). All alarms send to the SNS topic <code>libralink-alerts</code>, which e-mails both of us, and also e-mail when the alarm goes back to OK.</p>
+  <p>The billing alarm from the brief's starter set is covered by our AWS Budgets alert (set on day 1, and fixed on 14 Nov after we found it was counting the free credits and its e-mails were unverified — see <a href="results.html">Results</a>). All alarms send to the SNS topic <code>libralink-alerts</code>, which e-mails both of us, and also e-mail when the alarm goes back to OK.</p>
 
   <figure class="ev"><img src="evidence/E-07-alarms.png" alt="CloudWatch alarms list">
     <div class="ev-missing">📷 Add <code>evidence/E-07-alarms.png</code>: CloudWatch › Alarms › All alarms, filtered by "libralink", showing all 12 and their state.</div>
@@ -165,7 +165,7 @@
     <li><b>IMDSv2 required</b> — blocks a common trick for stealing the server's AWS credentials.</li>
     <li><b>CloudTrail</b> — every change in the account is recorded, so we can investigate.</li>
     <li><b>Encryption at rest</b> — a lost disk, snapshot or backup file is unreadable without our AWS account.</li>
-    <li><b>Gemini key scope</b> — the key belongs to a Google project used only for this assistant, so a leak cannot touch anything else. <span class="fill">FILL: confirm what you did: no billing attached to that Google project (free tier only), and the key restricted to the Generative Language API in Google Cloud console › Credentials.</span></li>
+    <li><b>Gemini key scope</b> — the app uses its own key, named <code>libralink-desk</code> (created 8 Nov 2026), restricted to the <b>Gemini API only</b>, so a leaked key cannot be used for any other Google service. The Google account has <b>no billing account at all</b>, so the key can only use the free tier and a leak could never run up a bill. The key's value lives only in Parameter Store as a SecureString. After grading we delete this key (we keep any keys used for other courses).</li>
   </ul>
 
   <div class="pair">
@@ -190,6 +190,9 @@
   <figure class="ev"><img src="evidence/E-13b-secret-scan.png" alt="Secret scan output">
     <div class="ev-missing">📷 Add <code>evidence/E-13b-secret-scan.png</code>: output of <code>bash ops/check-secrets.sh</code> showing "clean" for files and for N commits.</div>
     <figcaption><b>E-13b</b> No secrets in the files or in any commit.</figcaption></figure>
+  <figure class="ev"><img src="evidence/E-13c-gemini-key-restricted.png" alt="Gemini API keys restricted to the Gemini API">
+    <div class="ev-missing">📷 Add <code>evidence/E-13c-gemini-key-restricted.png</code>.</div>
+    <figcaption><b>E-13c</b> Google Cloud › Credentials: the <code>libralink-desk</code> key is restricted to the Gemini API (key values hidden). The other key in this project was made on 3 Nov for another course and is not used by LibraLink.</figcaption></figure>
 </main>
 <script src="assets/site.js"></script>
 </body>

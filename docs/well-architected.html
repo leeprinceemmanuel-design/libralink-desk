@@ -38,10 +38,10 @@
   <p><b>The framework asks:</b> recover from failure automatically, test recovery, avoid single points of failure. <b>We do:</b> hourly backups to S3 with a tested restore (RTO 30 seconds measured for the database, RPO up to 1 hour), Docker restarts crashed containers, systemd restarts the stack after a reboot, the health check notices outages from outside, log rotation prevents a full disk. <b>Accepted gap:</b> one server in one Availability Zone.</p>
 
   <h3>Performance Efficiency — <span class="verdict v-adequate">adequate</span></h3>
-  <p><b>The framework asks:</b> right-size resources using data. <b>We do:</b> we measured memory (48% average over 6 hours, 72% highest) and CPU (<span class="fill">FILL</span>%) under our test load, and kept <b>t3.small</b>, because memory never came near our 90% alarm; the larger Free Tier size (c7i-flex.large, 4 GB) would only be needed if it did. Average answer time <span class="fill">FILL</span> s, mostly spent waiting for the model. <b>Still weak:</b> no load test with many users at once.</p>
+  <p><b>The framework asks:</b> right-size resources using data. <b>We do:</b> we measured memory (48% average over 6 hours, 72% highest) and CPU (about 1–2% on the dashboard, with a short rise at start-up) under our test load, and kept <b>t3.small</b>, because memory never came near our 90% alarm; the larger Free Tier size (c7i-flex.large, 4 GB) would only be needed if it did. Average answer time 2.4 s, mostly spent waiting for the model. <b>Still weak:</b> no load test with many users at once.</p>
 
   <h3>Cost Optimization — <span class="verdict v-good">good</span></h3>
-  <p><b>The framework asks:</b> pay only for what you use and know where the money goes. <b>We do:</b> a monthly budget with e-mails at 50/80/100%; every resource tagged <code>Project=SAM10</code>, <code>Team=libralink</code>; the model is on a free tier; CloudFront instead of a paid load balancer; backups expire after 8 days. Cost per day: <span class="fill">FILL before → after</span>. <b>Still weak:</b> the Elastic IP and instance cost money even at night when nobody uses the system.</p>
+  <p><b>The framework asks:</b> pay only for what you use and know where the money goes. <b>We do:</b> a USD 30 monthly budget on the real cost (free credits excluded) with e-mails at 50/80/100% — fixed on 14 Nov, because the first version counted the credits and its e-mails were never verified; every resource tagged <code>Project=SAM10</code>, <code>Team=libralink</code>; the model is on a free tier; CloudFront instead of a paid load balancer; backups expire after 8 days. Cost per day: USD 0.818 for the bare server, IP and disk → USD 0.820 with all the improvements (10–12 Nov). <b>Still weak:</b> the Elastic IP and instance cost money even at night when nobody uses the system.</p>
 
   <h3>Sustainability — <span class="verdict v-good">good</span></h3>
   <p><b>The framework asks:</b> the same results with a smaller footprint. <b>We do:</b> one small instance, no idle extra servers, the AI model shared on the provider's hardware instead of a GPU of our own, short log retention, conversation search (Meilisearch) switched off because nobody needed it. <b>Still weak:</b> the server runs 24 hours a day.</p>
@@ -59,8 +59,6 @@
 
   <h2>The one gap we would fix first</h2>
   <p><b>Reliability: the single server.</b> Everything else on this page is "good enough" for a class project, but if our one instance or its Availability Zone fails, users get nothing until we rebuild — 30 seconds to restore the database (measured) plus launching and setting up a new server, which we have not timed end to end. The first fix is cheap: an EC2 Auto Scaling group of one instance with a launch template that runs our bootstrap script, so a dead server is replaced automatically; MongoDB data would move to a separate EBS volume with snapshots (or to a managed MongoDB-compatible database). That turns "we restore by hand" into "it heals itself".</p>
-
-  <p class="stat-label"><span class="fill">FILL (optional, same credit): link to the report from the free AWS Well-Architected Tool if you also record these answers there.</span></p>
 </main>
 <script src="assets/site.js"></script>
 </body>

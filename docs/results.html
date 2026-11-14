@@ -85,29 +85,47 @@
   <figure class="ev"><img src="evidence/E-04b-eval-flash-429.png" alt="gemini-3.5-flash failures were HTTP 429">
     <div class="ev-missing">📷 Add <code>evidence/E-04b-eval-flash-429.png</code>.</div>
     <figcaption><b>E-04b</b> The "failures" of gemini-3.5-flash were refused requests (HTTP 429), not wrong answers.</figcaption></figure>
+  <figure class="ev"><img src="evidence/E-04d-eval-day5.png" alt="Evaluation repeated on day 5, 30 of 30">
+    <div class="ev-missing">📷 Add <code>evidence/E-04d-eval-day5.png</code>.</div>
+    <figcaption><b>E-04d</b> The same test five days later (14 Nov 2026): 30/30 again, answers in about 1.1–1.6 s. The score did not drift.</figcaption></figure>
 
   <h2 id="before-after">Before and after</h2>
-  <p>Each row measures the same thing, the same way, over equal periods. "Before" = <span class="fill">FILL: date-time range</span>; "after" = <span class="fill">FILL: equal-length range</span>.</p>
+  <p><b>Before</b> = the first deployment as it was on 9 Nov 2026, 15:38–16:18 PHT (CloudTrail: server started → port 80 closed to the world), before any monitoring, logging or backups existed. Many things <i>could not be measured</i> then — that is itself the finding. <b>After</b> = the improved system, mainly <b>10 Nov 00:00 → 14 Nov 15:00 PHT</b> (4.6 days of normal running, nobody touching it), with the 9 Nov test day shown separately where it matters.</p>
   <div class="table-wrap"><table>
     <tr><th>Measure</th><th>How we got it</th><th>Before</th><th>After</th></tr>
-    <tr><td>Availability</td><td>Health checks OK ÷ health checks run</td><td><span class="fill">FILL (no check existed → "not measured")</span></td><td><span class="fill">FILL %</span></td></tr>
-    <tr><td>Average answer time</td><td><code>AnswerDurationMs</code> average</td><td><span class="fill">FILL s</span></td><td><span class="fill">FILL s</span></td></tr>
-    <tr><td>Failed answers</td><td><code>AnswersFailed</code> ÷ <code>AnswersTotal</code></td><td><span class="fill">FILL</span></td><td><span class="fill">FILL</span></td></tr>
-    <tr><td>Answer quality</td><td>eval.py score</td><td><span class="fill">FILL (e.g. first run)</span></td><td><span class="fill">FILL (after any prompt change)</span></td></tr>
-    <tr><td>Memory used</td><td><code>mem_used_percent</code> average</td><td>t3.small, 9 Nov 15:51–21:51 PHT: <b>48%</b> average (hourly averages 38–52%), highest <b>72%</b> (first hour, while the server was starting). The 38% hour includes the incident, when MongoDB was down.</td><td>Not resized — measured, and t3.small is enough (memory alarm at 90%). <span class="fill">FILL on day 3: same-length window, e.g. 10 Nov 15:51–21:51</span></td></tr>
-    <tr><td>Disk used</td><td><code>disk_used_percent</code> average</td><td><span class="fill">FILL %</span></td><td><span class="fill">FILL %</span></td></tr>
+    <tr><td>Availability</td><td>Health checks OK ÷ health checks run</td><td>not measured (no check existed)</td><td><b>99.8%</b>: 472 of 473 checks OK, 9 Nov 17:01 → 14 Nov 15:01 PHT. The only failure was during our own incident test (9 Nov 21:16); 10–14 Nov: no failures.</td></tr>
+    <tr><td>Average answer time</td><td><code>AnswerDurationMs</code> average</td><td>not measured (no request log)</td><td><b>2.4 s</b> average on 9 Nov (29 answers) and again 2.4 s on 14 Nov (10 answers); slowest 7.3 s</td></tr>
+    <tr><td>Failed answers</td><td><code>AnswersFailed</code> ÷ <code>AnswersTotal</code></td><td>not measured</td><td><b>0 of 39</b> logged answers. Honest limit: during the incident the database was down, so the failed questions were never saved and our logger could not see them; the 5xx alarm caught that instead.</td></tr>
+    <tr><td>Answer quality</td><td>eval.py score</td><td>not measured (stock LibreChat had no handbook, so it could not know our invented library's rules)</td><td><b>30/30</b> on 9 Nov and <b>30/30</b> again on 14 Nov (same model, same content; no prompt changes in between)</td></tr>
+    <tr><td>Memory used</td><td><code>mem_used_percent</code> average</td><td>t3.small, first hour (9 Nov 15:51–16:51 PHT): 50.6% average, 71.9% highest, while starting up</td><td><b>44–47%</b> daily average, highest <b>46.9%</b> (10–14 Nov). Not resized: measured, and t3.small is enough (memory alarm at 90%).</td></tr>
+    <tr><td>Disk used</td><td><code>disk_used_percent</code> average</td><td>about 42% just after start-up; no alarm and no log rotation</td><td><b>43.0–43.4%</b> daily average, highest 43.5% (10–14 Nov) — flat thanks to log rotation. On 9 Nov it reached 99.99% during the incident test.</td></tr>
     <tr><td>Time to detect a full disk</td><td>Incident timeline + alarm history</td><td>never (no alarm)</td><td>4 min (and 2 min before users were affected)</td></tr>
-    <tr><td>Backups succeeded</td><td><code>BackupSucceeded</code> sum</td><td>0</td><td><span class="fill">FILL / FILL</span></td></tr>
-    <tr><td><b>Cost per day</b></td><td>Cost Explorer, daily, tag Project=SAM10</td><td><span class="fill">FILL USD</span></td><td><span class="fill">FILL USD</span></td></tr>
+    <tr><td>Backups succeeded</td><td><code>BackupSucceeded</code> sum + automation log</td><td>0 (no backups)</td><td><b>118 of 120</b> scheduled hourly backups (98.3%), 9 Nov 16:05 → 14 Nov 15:05 PHT. Both misses were on 9 Nov during our own tests; 10–14 Nov: all OK.</td></tr>
+    <tr><td><b>Cost per day</b></td><td>Cost Explorer, daily, tag Project=SAM10</td><td><b>USD 0.818</b> per day: server, public IP and disk only (the same three bill lines on 10 Nov: 0.6336 + 0.12 + 0.064)</td><td><b>USD 0.820</b> per day on 10, 11 and 12 Nov. Monitoring, alarms, backups, HTTPS, the health check and CloudTrail together add about <b>USD 0.002 a day</b> (mostly S3), because they fit inside AWS free tiers.</td></tr>
     <tr><td>AI model cost</td><td>Google AI Studio usage page</td><td>USD 0 (free tier)</td><td>USD 0 (free tier)</td></tr>
   </table></div>
 
   <figure class="ev"><img src="evidence/E-16-cost.png" alt="Cost Explorer daily cost">
-    <div class="ev-missing">📷 Add <code>evidence/E-16-cost.png</code>: Billing › Cost Explorer, daily granularity, the project's days, grouped by Service (and the Budgets page).</div>
-    <figcaption><b>E-16</b> Cost before and after, per day.</figcaption></figure>
+    <div class="ev-missing">📷 Add <code>evidence/E-16-cost.png</code>: Billing › Cost Explorer, daily granularity, the project's days, grouped by Service .</div>
+    <figcaption><b>E-16</b> Cost Explorer, 9–14 Nov 2026, daily, by service, credits excluded (so it shows the real cost before the Free plan credits pay it): USD 0.56 (half day), 0.82, 0.82, 0.82, 0.86; 14 Nov not counted yet.</figcaption></figure>
+  <p><b>Reading the cost honestly.</b> About 77% of the cost is the t3.small server (USD 0.63 a day), 15% the public IPv4 address (USD 0.12) and 8% the disk (USD 0.06). That is about USD 25 a month, paid from the Free plan's USD 100 in credits, which would last roughly 4 months at this rate. We use <b>10–12 Nov</b> for "cost per day" because from 13 Nov 20:57 the account also holds one t3.micro for another course, which is not part of this project. The cheapest real saving would be stopping the server at night (see <a href="about.html">next steps</a>).</p>
+
+  <h3>The budget alert did not work — until we checked it</h3>
+  <p>We set a USD 10 monthly budget on day 1, as the brief asks. When we opened it on 14 Nov it showed <b>USD 0.00 spent</b> and <b>"0/2 emails verified"</b>. Two separate problems:</p>
+  <ul>
+    <li><b>It counted the Free plan credits.</b> The credits pay the whole bill, so the budget saw a net cost of zero and would never have warned us — not even about a forgotten expensive server.</li>
+    <li><b>Nobody would have received the e-mail.</b> AWS now requires each budget recipient to verify their address, and neither of us had.</li>
+  </ul>
+  <p><b>Fix (14 Nov 2026):</b> both addresses verified; the budget now includes only real charge types (usage, tax, fees — not credits or refunds); and the amount is <b>USD 30</b>, just above our real run rate of about USD 25 a month, so an alert means "something unusual is running" instead of firing every month. Right after the change it showed <b>USD 3.89 of USD 30 (12.95%)</b> — the same total as Cost Explorer. Lesson: an alert you have never seen fire is not proven to work.</p>
+  <figure class="ev"><img src="evidence/E-16b-budget-before-fix.png" alt="Budget showing 0 dollars spent and 0 of 2 e-mails verified">
+    <div class="ev-missing">📷 Add <code>evidence/E-16b-budget-before-fix.png</code>.</div>
+    <figcaption><b>E-16b</b> Before: USD 0.00 of 10 "spent", 0/2 e-mails verified.</figcaption></figure>
+  <figure class="ev"><img src="evidence/E-16c-budget-after-fix.png" alt="Budget showing 3.89 of 30 dollars with charge-type filter">
+    <div class="ev-missing">📷 Add <code>evidence/E-16c-budget-after-fix.png</code>.</div>
+    <figcaption><b>E-16c</b> After: USD 3.89 of 30, 2/2 e-mails verified, credits and refunds excluded.</figcaption></figure>
   <figure class="ev"><img src="evidence/R-01-graph.png" alt="Before and after graph">
     <div class="ev-missing">📷 Add <code>evidence/R-01-graph.png</code>: at least one graph — e.g. the CloudWatch disk + memory widget over the whole project (shows the incident spike, the fix, and the change after right-sizing), with the date range visible.</div>
-    <figcaption><b>R-01</b> <span class="fill">FILL: what the graph shows, with its date range</span>.</figcaption></figure>
+    <figcaption><b>R-01</b> Disk % (blue) and memory % (orange), highest value per period, 9 Nov 08:00 → 14 Nov 15:42 PHT. Disk: about 42%, straight up to 100% during the incident on 9 Nov evening, back down after the fix, then flat at about 43% for five days. Memory: jumpy on the first afternoon (start-up and testing), down to about 20% while MongoDB was crashed, then steady at 44–47%.</figcaption></figure>
 </main>
 <script src="assets/site.js"></script>
 </body>
